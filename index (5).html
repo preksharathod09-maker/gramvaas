@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="theme-color" content="#1C3A2A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<title>GramVaas — India's Farmhouse Booking Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ===== RESET ===== */
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--dg:#1C3A2A;--olive:#4A6741;--terra:#C2623F;--gold:#D4A843;--cream:#FAF6EE;--sand:#F5EDD6;--bark:#7A5C3A;--sage:#8BA888;--dark:#0F1E16;--border:#E2D5BE;--shadow:rgba(28,58,42,0.12);--nav:60px;--bot:60px}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--dark);overflow-x:hidden;padding-bottom:var(--bot)}
+img{max-width:100%;display:block}
+/* Prevent iOS zoom on inputs */
+input,select,textarea{font-size:16px!important;font-family:'DM Sans',sans-serif}
+button{font-family:'DM Sans',sans-serif;cursor:pointer;touch-action:manipulation}
+
+/* ===== BUTTONS ===== */
+.btn{padding:11px 22px;border-radius:50px;font-size:0.9rem;font-weight:500;border:none;transition:all 0.2s;display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;-webkit-appearance:none}
+.btn:active{transform:scale(0.97)}
+.btn-primary{background:var(--terra);color:#fff}
+.btn-outline{background:transparent;border:1.5px solid var(--dg);color:var(--dg)}
+.btn-outline:active{background:var(--dg);color:#fff}
+.btn-green{background:var(--dg);color:#fff}
+.btn-gold{background:var(--gold);color:var(--dark)}
+.btn-sm{padding:9px 18px;font-size:0.82rem;min-height:40px}
+.btn-lg{padding:14px 30px;font-size:1rem;min-height:50px}
+.btn-full{width:100%;justify-content:center}
+
+/* ===== PAGES ===== */
+.page{display:none;min-height:100vh}
+.page.active{display:block}
+
+/* ===== TOP NAV ===== */
+nav{position:fixed;top:0;left:0;right:0;z-index:900;background:rgba(250,246,238,0.97);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--border);height:var(--nav)}
+.nav-in{max-width:1400px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:100%;padding:0 1rem}
+.logo{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;color:var(--dg);text-decoration:none;cursor:pointer;flex-shrink:0}
+.logo span{color:var(--terra)}
+.nav-links{display:flex;gap:1.75rem;list-style:none}
+.nav-links a{text-decoration:none;color:var(--dark);font-size:0.875rem;font-weight:500;cursor:pointer;transition:color 0.2s}
+.nav-links a:hover{color:var(--terra)}
+.nav-cta{display:flex;gap:8px;align-items:center}
+/* Hamburger */
+.hbg{display:none;flex-direction:column;gap:5px;padding:8px;background:none;border:none;min-height:44px;min-width:44px;align-items:center;justify-content:center}
+.hbg span{display:block;width:22px;height:2px;background:var(--dg);border-radius:2px;transition:all 0.3s}
+.hbg.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.hbg.open span:nth-child(2){opacity:0}
+.hbg.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+
+/* Mobile Drawer */
+.mob-overlay{position:fixed;top:var(--nav);left:0;right:0;bottom:0;background:rgba(15,30,22,0.5);z-index:850;opacity:0;pointer-events:none;transition:opacity 0.3s}
+.mob-overlay.open{opacity:1;pointer-events:all}
+.mob-drawer{position:absolute;top:0;left:0;right:0;background:var(--cream);padding:1.5rem 1.25rem 2rem;transform:translateY(-105%);transition:transform 0.35s cubic-bezier(0.4,0,0.2,1);border-bottom-left-radius:24px;border-bottom-right-radius:24px;box-shadow:0 10px 40px rgba(0,0,0,0.2)}
+.mob-overlay.open .mob-drawer{transform:translateY(0)}
+.mob-link{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--border);font-size:1rem;font-weight:500;color:var(--dark);cursor:pointer}
+.mob-link:last-of-type{border:none}
+.mob-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:1.25rem}
+
+/* ===== BOTTOM NAV ===== */
+.bot-nav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:900;background:white;border-top:1px solid var(--border);height:var(--bot);align-items:center;justify-content:space-around;box-shadow:0 -3px 16px rgba(0,0,0,0.07)}
+.bn-item{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:6px 10px;border-radius:10px;transition:all 0.18s;min-width:54px}
+.bn-item.on{background:rgba(28,58,42,0.08)}
+.bn-icon{font-size:1.2rem;line-height:1}
+.bn-lbl{font-size:0.62rem;font-weight:600;color:var(--bark);text-transform:uppercase;letter-spacing:0.04em}
+.bn-item.on .bn-lbl{color:var(--dg)}
+
+/* ===== HERO ===== */
+.hero{background:var(--dg);padding-top:var(--nav);position:relative;overflow:hidden}
+.h-pattern{position:absolute;inset:0;background-image:radial-gradient(rgba(212,168,67,0.06) 1px,transparent 1px);background-size:28px 28px;pointer-events:none}
+.h-blob{position:absolute;border-radius:50%;background:rgba(212,168,67,0.07);pointer-events:none}
+.h-b1{width:500px;height:500px;top:-150px;right:-150px}
+.h-b2{width:300px;height:300px;bottom:-100px;left:-60px}
+.h-in{max-width:1400px;margin:0 auto;padding:2.5rem 1.25rem 0;display:grid;grid-template-columns:1fr 400px;gap:3rem;align-items:center;position:relative}
+.h-tag{display:inline-flex;align-items:center;gap:6px;background:rgba(212,168,67,0.18);color:var(--gold);padding:6px 14px;border-radius:50px;font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:1.1rem}
+.h-in h1{font-family:'Playfair Display',serif;font-size:clamp(1.9rem,5vw,3.8rem);line-height:1.1;color:var(--cream);margin-bottom:1rem}
+.h-in h1 em{font-style:italic;color:var(--gold)}
+.h-desc{font-size:0.95rem;color:rgba(245,237,214,0.75);line-height:1.8;margin-bottom:1.75rem;max-width:480px}
+.h-stats{display:flex;gap:1.5rem;margin-bottom:1.75rem;flex-wrap:wrap}
+.sn{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:var(--gold)}
+.sl{font-size:0.68rem;color:rgba(245,237,214,0.6);text-transform:uppercase;letter-spacing:0.06em;margin-top:1px}
+.h-btns{display:flex;gap:10px;flex-wrap:wrap;padding-bottom:2.5rem}
+
+/* SEARCH BOX */
+.sbox{background:white;border-radius:20px;padding:1.5rem;box-shadow:0 20px 60px rgba(0,0,0,0.35)}
+.sbox h3{font-family:'Playfair Display',serif;font-size:1rem;color:var(--dg);margin-bottom:1rem}
+.sf{margin-bottom:10px}
+.sf label{display:block;font-size:0.7rem;font-weight:600;color:var(--olive);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px}
+.sf input,.sf select{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;color:var(--dark);background:var(--cream);-webkit-appearance:none;appearance:none;transition:border 0.2s}
+.sf input:focus,.sf select:focus{outline:none;border-color:var(--olive)}
+.sf-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* ===== SECTIONS ===== */
+section{padding:4rem 1.25rem}
+.si{max-width:1400px;margin:0 auto}
+.s-tag{display:inline-block;background:rgba(74,103,65,0.12);color:var(--olive);padding:5px 14px;border-radius:50px;font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.6rem}
+.s-title{font-family:'Playfair Display',serif;font-size:clamp(1.6rem,5vw,2.6rem);color:var(--dg);margin-bottom:0.6rem;line-height:1.2}
+.s-sub{color:var(--bark);font-size:0.9rem;line-height:1.8;max-width:560px;margin-bottom:2rem}
+.g3{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.25rem}
+.g4{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:1.25rem}
+
+/* ===== PROPERTY CARD ===== */
+.pc{background:white;border-radius:18px;overflow:hidden;box-shadow:0 3px 20px var(--shadow);cursor:pointer;position:relative;transition:transform 0.2s}
+.pc:active{transform:scale(0.98)}
+.pc-img{height:195px;position:relative;overflow:hidden;background:var(--sand);display:flex;align-items:center;justify-content:center;font-size:4.5rem}
+.pc-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.pc-b{position:absolute;top:10px;left:10px;padding:4px 11px;border-radius:50px;font-size:0.68rem;font-weight:600}
+.pb1{background:var(--gold);color:var(--dark)}.pb2{background:var(--terra);color:#fff}.pb3{background:var(--olive);color:#fff}.pb4{background:var(--dg);color:#fff}
+.pc-w{position:absolute;top:10px;right:10px;width:38px;height:38px;background:white;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;font-size:1.1rem;box-shadow:0 2px 8px rgba(0,0,0,0.15)}
+.pc-w.on{background:var(--terra);color:white}
+.pc-bd{padding:1rem}
+.pc-loc{font-size:0.7rem;color:var(--sage);font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px}
+.pc-nm{font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--dg);font-weight:600;margin-bottom:5px;line-height:1.3}
+.pc-mt{display:flex;gap:10px;font-size:0.75rem;color:var(--bark);margin-bottom:7px;flex-wrap:wrap}
+.pc-am{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
+.at{background:var(--sand);color:var(--olive);padding:3px 9px;border-radius:50px;font-size:0.67rem;font-weight:500}
+.pc-ft{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border);padding-top:10px}
+.pc-pr .amt{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:var(--dg)}
+.pc-pr .per{font-size:0.7rem;color:var(--bark)}
+.pc-rt{font-size:0.8rem;font-weight:500}
+
+/* ===== CATEGORIES ===== */
+.cats{display:flex;gap:8px;overflow-x:auto;padding:0 0 6px;scrollbar-width:none;-ms-overflow-style:none}
+.cats::-webkit-scrollbar{display:none}
+.cat{white-space:nowrap;padding:9px 18px;border-radius:50px;border:1.5px solid var(--border);background:white;font-size:0.82rem;font-weight:500;color:var(--dark);flex-shrink:0;min-height:40px;transition:all 0.18s}
+.cat.on,.cat:active{background:var(--dg);color:white;border-color:var(--dg)}
+
+/* ===== LISTINGS ===== */
+.ls-hd{background:var(--dg);padding:1.25rem;position:sticky;top:var(--nav);z-index:80}
+.ls-hd h2{font-family:'Playfair Display',serif;font-size:1.35rem;color:var(--cream);margin-bottom:0.9rem}
+.f-toggle{display:none;align-items:center;justify-content:center;gap:8px;background:rgba(255,255,255,0.15);color:white;border:none;padding:11px 18px;border-radius:50px;font-size:0.875rem;font-weight:500;width:100%;min-height:44px}
+.f-panel{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.f-panel input,.f-panel select{padding:10px 14px;border-radius:50px;border:none;background:rgba(255,255,255,0.15);color:white;-webkit-appearance:none;appearance:none;min-height:44px}
+.f-panel input::placeholder{color:rgba(255,255,255,0.6)}
+.f-panel select option{background:var(--dg);color:white}
+.f-panel input:focus,.f-panel select:focus{outline:none;background:rgba(255,255,255,0.22)}
+.f-panel.hidden{display:none}
+
+/* ===== DETAIL ===== */
+.dg{height:270px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:var(--dg)}
+.dg .cv{width:100%;height:100%;object-fit:cover}
+.dg .ef{font-size:6rem;opacity:0.25}
+.d-ov{position:absolute;bottom:0;left:0;right:0;height:55%;background:linear-gradient(to top,rgba(15,30,22,0.8),transparent);pointer-events:none}
+.g-thumbs{display:flex;gap:7px;overflow-x:auto;padding:8px 1.25rem;background:rgba(0,0,0,0.4);scrollbar-width:none}
+.g-thumbs::-webkit-scrollbar{display:none}
+.g-th{width:68px;height:48px;border-radius:7px;overflow:hidden;flex-shrink:0;cursor:pointer;border:2px solid transparent;transition:border 0.2s}
+.g-th.on{border-color:var(--gold)}
+.g-th img{width:100%;height:100%;object-fit:cover}
+.g-th-e{width:68px;height:48px;background:rgba(255,255,255,0.1);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0}
+.d-in{max-width:1400px;margin:0 auto;padding:1.5rem 1.25rem 120px;display:grid;grid-template-columns:1fr 360px;gap:2.5rem}
+.ds-row{display:flex;gap:1.5rem;padding:1rem 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:1.5rem;flex-wrap:wrap}
+.ds .v{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--dg)}
+.ds .l{font-size:0.73rem;color:var(--bark);margin-top:1px}
+.ag{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1.5rem}
+.ai{display:flex;align-items:center;gap:7px;padding:9px 10px;background:var(--sand);border-radius:9px;font-size:0.78rem;font-weight:500;color:var(--dg)}
+
+/* BOOKING CARD */
+.bk-card{background:white;border-radius:18px;padding:1.5rem;box-shadow:0 6px 32px var(--shadow)}
+.bk-pr{font-family:'Playfair Display',serif;font-size:1.75rem;font-weight:700;color:var(--dg);margin-bottom:1rem}
+.bk-pr span{font-size:0.85rem;font-weight:400;color:var(--bark)}
+.bk-form label{display:block;font-size:0.7rem;font-weight:600;color:var(--olive);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px}
+.bk-form input,.bk-form select{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;background:var(--cream);margin-bottom:10px;-webkit-appearance:none;appearance:none}
+.bk-form input:focus,.bk-form select:focus{outline:none;border-color:var(--olive)}
+.pb{background:var(--sand);border-radius:11px;padding:1.1rem;margin:0.75rem 0}
+.pb-row{display:flex;justify-content:space-between;font-size:0.85rem;margin-bottom:6px}
+.pb-tot{display:flex;justify-content:space-between;font-weight:700;font-size:0.95rem;padding-top:8px;border-top:1px solid var(--border);margin-top:3px}
+
+/* Sticky book bar (mobile only) */
+.stick-book{display:none;position:fixed;bottom:var(--bot);left:0;right:0;z-index:800;background:white;padding:10px 1.25rem;border-top:1px solid var(--border);gap:12px;align-items:center;box-shadow:0 -4px 20px rgba(0,0,0,0.1)}
+.sb-price{font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;color:var(--dg)}
+.sb-price small{font-size:0.72rem;font-weight:400;color:var(--bark)}
+
+/* ===== TESTIMONIALS ===== */
+.tst-sec{background:var(--dg)}
+.tc{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:18px;padding:1.5rem}
+.tc-tx{font-family:'Playfair Display',serif;font-size:0.95rem;line-height:1.85;color:rgba(245,237,214,0.88);font-style:italic;margin-bottom:1rem}
+.tc-st{color:var(--gold);font-size:0.85rem;margin-bottom:0.6rem}
+.tc-au{display:flex;align-items:center;gap:10px}
+.tc-av{width:40px;height:40px;border-radius:50%;background:var(--terra);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.78rem;color:white;flex-shrink:0}
+.tc-nm{font-weight:600;color:var(--cream);font-size:0.85rem}
+.tc-lc{font-size:0.7rem;color:var(--gold);margin-top:1px}
+
+/* ===== FEATURES ===== */
+.fc{background:white;border-radius:14px;padding:1.4rem;border:1px solid var(--border)}
+.fi{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.25rem;margin-bottom:0.9rem}
+.fi-g{background:rgba(28,58,42,0.1)}.fi-t{background:rgba(194,98,63,0.1)}.fi-a{background:rgba(212,168,67,0.15)}
+.fc h3{font-family:'Playfair Display',serif;font-size:0.95rem;color:var(--dg);margin-bottom:0.3rem}
+.fc p{font-size:0.82rem;color:var(--bark);line-height:1.7}
+
+/* ===== FOOTER ===== */
+footer{background:var(--dark);color:rgba(245,237,214,0.75);padding:3.5rem 1.25rem 2rem}
+.ft-in{max-width:1400px;margin:0 auto}
+.ft-g{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:2.5rem;margin-bottom:2.5rem}
+.ft-br{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--cream);margin-bottom:0.75rem}
+.ft-ds{font-size:0.8rem;line-height:1.8;color:rgba(245,237,214,0.48)}
+.ft-cl h4{font-size:0.7rem;text-transform:uppercase;letter-spacing:0.09em;color:var(--gold);margin-bottom:0.85rem}
+.ft-cl a{display:block;font-size:0.8rem;color:rgba(245,237,214,0.52);text-decoration:none;margin-bottom:7px;cursor:pointer}
+.ft-bt{border-top:1px solid rgba(245,237,214,0.1);padding-top:1.25rem;display:flex;justify-content:space-between;font-size:0.73rem;color:rgba(245,237,214,0.32);flex-wrap:wrap;gap:5px}
+
+/* ===== MODALS ===== */
+.mo{position:fixed;inset:0;background:rgba(15,30,22,0.7);z-index:2000;display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.mo.hidden{display:none}
+.mb{background:white;border-radius:24px 24px 0 0;padding:0 1.5rem 2rem;width:100%;max-width:560px;max-height:94vh;overflow-y:auto;position:relative;animation:su 0.32s cubic-bezier(0.4,0,0.2,1)}
+@keyframes su{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.mb-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:14px auto 1.25rem}
+.mb h2{font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--dg);margin-bottom:0.35rem}
+.mb>p{color:var(--bark);font-size:0.875rem;margin-bottom:1.25rem}
+.mc{position:absolute;top:14px;right:1.25rem;background:var(--sand);border:none;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.88rem;color:var(--bark)}
+.mg{display:flex;flex-direction:column;gap:5px;margin-bottom:0.85rem}
+.mg label{font-size:0.7rem;font-weight:600;color:var(--olive);text-transform:uppercase;letter-spacing:0.05em}
+.mg input,.mg select,.mg textarea{padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;color:var(--dark);background:var(--cream);-webkit-appearance:none;appearance:none}
+.mg input:focus,.mg select:focus,.mg textarea:focus{outline:none;border-color:var(--olive)}
+.mg textarea{min-height:72px;resize:vertical}
+.gr2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.dvd{text-align:center;position:relative;margin:0.75rem 0;font-size:0.75rem;color:var(--bark)}
+.dvd::before{content:'';position:absolute;top:50%;left:0;right:0;height:1px;background:var(--border)}
+.dvd span{background:white;padding:0 12px;position:relative}
+
+/* ===== TOAST ===== */
+.toast{position:fixed;bottom:calc(var(--bot) + 12px);left:1rem;right:1rem;background:var(--dg);color:var(--cream);padding:13px 20px;border-radius:13px;font-size:0.875rem;z-index:9999;transform:translateY(120px);transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1);box-shadow:0 8px 30px rgba(0,0,0,0.28);text-align:center}
+.toast.show{transform:translateY(0)}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:768px){
+  body{--nav:56px;--bot:58px}
+  /* Nav */
+  .nav-links,.nav-cta{display:none}
+  .hbg{display:flex}
+  .bot-nav{display:flex}
+  /* Hero */
+  .h-in{grid-template-columns:1fr;padding:1.75rem 1.25rem 0;gap:0}
+  .h-in h1{font-size:1.85rem}
+  .h-desc{font-size:0.88rem;margin-bottom:1.5rem}
+  .h-stats{gap:1.25rem;margin-bottom:1.5rem}
+  .sn{font-size:1.35rem}
+  .h-btns{padding-bottom:0;margin-bottom:0;gap:8px}
+  .h-btns .btn-lg{padding:12px 22px;font-size:0.875rem}
+  /* search box full-width below hero */
+  .sbox{border-radius:0;margin:0 -1.25rem;padding:1.25rem;box-shadow:none;border-top:2px solid rgba(255,255,255,0.08)}
+  /* Listings filters */
+  .f-toggle{display:flex}
+  .f-panel{flex-direction:column;padding-top:10px}
+  .f-panel input,.f-panel select{width:100%;border-radius:10px;background:rgba(255,255,255,0.12)}
+  .f-panel.hidden{display:none}
+  /* Grids */
+  .g3{grid-template-columns:1fr}
+  .g4{grid-template-columns:1fr 1fr}
+  /* Detail */
+  .dg{height:230px}
+  .d-in{grid-template-columns:1fr;padding:1.25rem 1rem 130px}
+  .ag{grid-template-columns:1fr 1fr}
+  .bk-card{display:none}
+  .stick-book{display:flex}
+  /* Sections */
+  section{padding:3rem 1.25rem}
+  /* Footer */
+  .ft-g{grid-template-columns:1fr 1fr;gap:1.5rem}
+  .ft-bt{flex-direction:column;text-align:center}
+  /* Modals */
+  .gr2{grid-template-columns:1fr}
+  /* Testimonials horizontal scroll */
+  .tc-row{display:flex;overflow-x:auto;gap:1rem;padding-bottom:8px;scrollbar-width:none}
+  .tc-row::-webkit-scrollbar{display:none}
+  .tc{min-width:280px;flex-shrink:0}
+}
+
+@media(max-width:420px){
+  .h-in h1{font-size:1.65rem}
+  .sn{font-size:1.2rem}
+  .g4{grid-template-columns:1fr}
+  .ag{grid-template-columns:1fr}
+  .ft-g{grid-template-columns:1fr}
+  .pc-img{height:175px}
+}
+
+@media(min-width:769px) and (max-width:1024px){
+  .h-in{grid-template-columns:1fr 340px;gap:2rem;padding:2.5rem 1.5rem}
+  .d-in{grid-template-columns:1fr 320px}
+  .g3{grid-template-columns:repeat(2,1fr)}
+  .ft-g{grid-template-columns:1fr 1fr 1fr}
+}
+
+/* iPhone safe areas */
+@supports(padding:env(safe-area-inset-top)){
+  nav{padding-top:env(safe-area-inset-top);height:calc(var(--nav) + env(safe-area-inset-top))}
+  body{--bot:calc(58px + env(safe-area-inset-bottom));padding-bottom:var(--bot)}
+  .bot-nav{padding-bottom:env(safe-area-inset-bottom)}
+  .stick-book{padding-bottom:calc(10px + env(safe-area-inset-bottom))}
+  .mb{padding-bottom:calc(2rem + env(safe-area-inset-bottom))}
+}
+</style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav>
+  <div class="nav-in">
+    <a class="logo" onclick="goPage('home')">🌿 Gram<span>Vaas</span></a>
+    <ul class="nav-links">
+      <li><a onclick="goPage('listings')">Explore</a></li>
+      <li><a onclick="goPage('home')">How It Works</a></li>
+      <li><a onclick="goPage('home')">Destinations</a></li>
+    </ul>
+    <div class="nav-cta">
+      <button class="btn btn-outline btn-sm" onclick="openMo('loginMo')">Sign In</button>
+      <button class="btn btn-primary btn-sm" onclick="openMo('registerMo')">List Property</button>
+      <a href="admin.html" class="btn btn-green btn-sm">⚙ Admin</a>
+    </div>
+    <button class="hbg" id="hbg" onclick="togMenu()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- MOBILE DRAWER -->
+<div class="mob-overlay" id="mobOverlay" onclick="closeOverlay(event)">
+  <div class="mob-drawer">
+    <div class="mob-link" onclick="goPage('home');togMenu()">🏠 Home</div>
+    <div class="mob-link" onclick="goPage('listings');togMenu()">🔍 Explore Farmhouses</div>
+    <div class="mob-link" onclick="goPage('home');togMenu()">❓ How It Works</div>
+    <div class="mob-link" onclick="togMenu()">📍 Destinations</div>
+    <div class="mob-btns">
+      <button class="btn btn-outline" onclick="openMo('loginMo');togMenu()">Sign In</button>
+      <button class="btn btn-primary" onclick="openMo('registerMo');togMenu()">List Property</button>
+    </div>
+    <a href="admin.html" class="btn btn-green btn-full" style="margin-top:10px;text-decoration:none;display:flex">⚙ Admin Panel</a>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bot-nav" id="botNav">
+  <div class="bn-item on" id="bn-home" onclick="goPage('home');setBar('home')">
+    <div class="bn-icon">🏠</div><div class="bn-lbl">Home</div>
+  </div>
+  <div class="bn-item" id="bn-explore" onclick="goPage('listings');setBar('explore')">
+    <div class="bn-icon">🔍</div><div class="bn-lbl">Explore</div>
+  </div>
+  <div class="bn-item" id="bn-saved" onclick="goPage('listings');setBar('saved')">
+    <div class="bn-icon">❤</div><div class="bn-lbl">Saved</div>
+  </div>
+  <div class="bn-item" id="bn-me" onclick="openMo('loginMo')">
+    <div class="bn-icon">👤</div><div class="bn-lbl">Sign In</div>
+  </div>
+</div>
+
+<!-- ====== HOME ====== -->
+<div class="page active" id="page-home">
+  <div class="hero">
+    <div class="h-pattern"></div>
+    <div class="h-blob h-b1"></div>
+    <div class="h-blob h-b2"></div>
+    <div class="h-in">
+      <div>
+        <div class="h-tag">🇮🇳 India's #1 Farmhouse Platform</div>
+        <h1>Discover <em>Authentic</em> Farm Escapes Across India</h1>
+        <p class="h-desc">From the Aravalli hills to the Konkan coast — book handpicked farmhouses, villas, and rural retreats with instant confirmation.</p>
+        <div class="h-stats">
+          <div><div class="sn" id="heroN">2,400+</div><div class="sl">Properties</div></div>
+          <div><div class="sn">36</div><div class="sl">States & UTs</div></div>
+          <div><div class="sn">98%</div><div class="sl">Happy Guests</div></div>
+          <div><div class="sn">₹999</div><div class="sl">Starting</div></div>
+        </div>
+        <div class="h-btns">
+          <button class="btn btn-primary btn-lg" onclick="goPage('listings')">🏡 Explore Farmhouses</button>
+          <button class="btn btn-lg" style="background:transparent;border:1.5px solid rgba(245,237,214,0.4);color:var(--cream)" onclick="openMo('registerMo')">List Property</button>
+        </div>
+      </div>
+      <div class="sbox">
+        <h3>🔍 Find Your Perfect Escape</h3>
+        <div class="sf"><label>State</label>
+          <select id="hSt" onchange="hCities()"><option value="">All States & UTs</option></select>
+        </div>
+        <div class="sf"><label>City</label>
+          <select id="hCt"><option value="">All Cities</option></select>
+        </div>
+        <div class="sf-row">
+          <div class="sf"><label>Check-in</label><input type="date" id="hCI"></div>
+          <div class="sf"><label>Check-out</label><input type="date" id="hCO"></div>
+        </div>
+        <div class="sf-row">
+          <div class="sf"><label>Guests</label>
+            <select><option>2 Guests</option><option>4 Guests</option><option>6 Guests</option><option>8 Guests</option><option>10+ Guests</option></select>
+          </div>
+          <div class="sf"><label>Type</label><select id="hTp"><option value="">Any Type</option></select></div>
+        </div>
+        <button class="btn btn-primary btn-full" style="margin-top:4px" onclick="doSearch()">🔍 Search Farmhouses</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CATS -->
+  <div style="padding:2rem 1.25rem 0.5rem"><div class="si">
+    <div class="cats">
+      <button class="cat on" onclick="catFilter(this,'')">🌾 All</button>
+      <button class="cat" onclick="catFilter(this,'Mountain Cabin')">🏔 Hill Retreats</button>
+      <button class="cat" onclick="catFilter(this,'Beach Cottage')">🌊 Coastal</button>
+      <button class="cat" onclick="catFilter(this,'Heritage Haveli')">🏛 Heritage</button>
+      <button class="cat" onclick="catFilter(this,'Eco Resort')">🌳 Eco Stays</button>
+      <button class="cat" onclick="catFilter(this,'Villa')">💎 Luxury Villa</button>
+      <button class="cat" onclick="catFilter(this,'Glamping')">⛺ Glamping</button>
+      <button class="cat" onclick="catFilter(this,'Working Farm')">🐄 Working Farm</button>
+      <button class="cat" onclick="catFilter(this,'Homestay')">🏠 Homestay</button>
+      <button class="cat" onclick="catFilter(this,'Farmhouse')">🌻 Farmhouse</button>
+    </div>
+  </div></div>
+
+  <!-- FEATURED -->
+  <section style="padding-top:1.5rem"><div class="si">
+    <div class="s-tag">Featured Properties</div>
+    <h2 class="s-title">Handpicked Farmhouses Across India</h2>
+    <p class="s-sub">Every property personally verified for authenticity, cleanliness, and rural charm.</p>
+    <div class="g3" id="featGrid"></div>
+    <div style="text-align:center;margin-top:2rem">
+      <button class="btn btn-full btn-lg" style="border:1.5px solid var(--olive);color:var(--olive);background:transparent;max-width:300px" onclick="goPage('listings')">View All Properties →</button>
+    </div>
+  </div></section>
+
+  <!-- HOW IT WORKS -->
+  <section style="background:var(--sand)"><div class="si">
+    <div class="s-tag">Simple Process</div>
+    <h2 class="s-title">Book in 3 Easy Steps</h2>
+    <div style="display:flex;flex-direction:column;gap:1.5rem;margin-top:1.5rem">
+      <div style="display:flex;gap:1rem;align-items:flex-start">
+        <div style="width:44px;height:44px;border-radius:50%;background:var(--terra);color:white;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-weight:700;font-size:1rem;flex-shrink:0">1</div>
+        <div><h3 style="font-family:'Playfair Display',serif;font-size:1rem;color:var(--dg);margin-bottom:4px">Discover &amp; Filter</h3><p style="font-size:0.875rem;color:var(--bark);line-height:1.7">Search 2,400+ verified farmhouses by location, dates, budget, and type. AI-powered filters find your match.</p></div>
+      </div>
+      <div style="display:flex;gap:1rem;align-items:flex-start">
+        <div style="width:44px;height:44px;border-radius:50%;background:var(--terra);color:white;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-weight:700;font-size:1rem;flex-shrink:0">2</div>
+        <div><h3 style="font-family:'Playfair Display',serif;font-size:1rem;color:var(--dg);margin-bottom:4px">Instant Book</h3><p style="font-size:0.875rem;color:var(--bark);line-height:1.7">Reserve with UPI, Cards, or Net Banking. Get confirmed booking in seconds with host contact details.</p></div>
+      </div>
+      <div style="display:flex;gap:1rem;align-items:flex-start">
+        <div style="width:44px;height:44px;border-radius:50%;background:var(--terra);color:white;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-weight:700;font-size:1rem;flex-shrink:0">3</div>
+        <div><h3 style="font-family:'Playfair Display',serif;font-size:1rem;color:var(--dg);margin-bottom:4px">Arrive &amp; Unwind</h3><p style="font-size:0.875rem;color:var(--bark);line-height:1.7">Check in and experience authentic rural India. Rate your stay and unlock exclusive repeat-guest offers.</p></div>
+      </div>
+    </div>
+  </div></section>
+
+  <!-- FEATURES -->
+  <section><div class="si">
+    <div class="s-tag">Why GramVaas</div>
+    <h2 class="s-title">Future-Ready Platform</h2>
+    <div class="g4" style="margin-top:1.5rem">
+      <div class="fc"><div class="fi fi-g">🤖</div><h3>AI Recommendations</h3><p>Personalized suggestions based on your travel history and preferences.</p></div>
+      <div class="fc"><div class="fi fi-t">📍</div><h3>Live Availability</h3><p>Real-time calendar sync with instant booking confirmation.</p></div>
+      <div class="fc"><div class="fi fi-a">🛡</div><h3>Verified Properties</h3><p>Every farmhouse physically inspected. 360° virtual tours available.</p></div>
+      <div class="fc"><div class="fi fi-g">💬</div><h3>12 Indian Languages</h3><p>Support in Hindi, Tamil, Marathi, Bengali &amp; 8 more languages.</p></div>
+      <div class="fc"><div class="fi fi-t">🔒</div><h3>Secure Payments</h3><p>UPI, Cards, Net Banking, EMI. PCI-DSS compliant platform.</p></div>
+      <div class="fc"><div class="fi fi-a">⭐</div><h3>Authentic Reviews</h3><p>Verified guest reviews only — AI fraud detection keeps ratings real.</p></div>
+      <div class="fc"><div class="fi fi-g">📊</div><h3>Dynamic Pricing</h3><p>Smart pricing adjusts for season, festivals, and demand automatically.</p></div>
+      <div class="fc"><div class="fi fi-t">🚁</div><h3>Drone View Tours</h3><p>Aerial footage of properties and surroundings before you book.</p></div>
+    </div>
+  </div></section>
+
+  <!-- TESTIMONIALS -->
+  <section class="tst-sec"><div class="si">
+    <div class="s-tag" style="background:rgba(212,168,67,0.2);color:var(--gold)">Guest Stories</div>
+    <h2 class="s-title" style="color:var(--cream);margin-bottom:1.5rem">What Our Guests Say</h2>
+    <div class="tc-row g3">
+      <div class="tc"><div class="tc-st">★★★★★</div><p class="tc-tx">"Booked a farmhouse in Lonavala for 14 people. Zero hassle — platform was smooth and property exactly as shown!"</p><div class="tc-au"><div class="tc-av">PR</div><div><div class="tc-nm">Priya Rajan</div><div class="tc-lc">📍 Mumbai · Family trip</div></div></div></div>
+      <div class="tc"><div class="tc-st">★★★★★</div><p class="tc-tx">"Anniversary at a Nashik vineyard. Recommendation was spot-on — romantic, private, and affordable."</p><div class="tc-au"><div class="tc-av">AK</div><div><div class="tc-nm">Arjun & Kavya</div><div class="tc-lc">📍 Pune · Anniversary</div></div></div></div>
+      <div class="tc"><div class="tc-st">★★★★☆</div><p class="tc-tx">"Team of 25 at a Rajasthan heritage farm with conference facilities. Group payments were a breeze!"</p><div class="tc-au"><div class="tc-av">RS</div><div><div class="tc-nm">Rohit Sharma</div><div class="tc-lc">📍 Delhi · Corporate</div></div></div></div>
+    </div>
+  </div></section>
+
+  <!-- HOST CTA -->
+  <section style="background:var(--sand);text-align:center"><div class="si" style="max-width:640px">
+    <div class="s-tag">For Property Owners</div>
+    <h2 class="s-title">Earn from Your Farmhouse</h2>
+    <p class="s-sub" style="margin:0 auto 1.75rem;text-align:center">List on GramVaas and earn ₹50,000–₹5,00,000 per month.</p>
+    <div style="display:flex;flex-direction:column;gap:10px;align-items:center">
+      <button class="btn btn-primary btn-lg btn-full" style="max-width:320px" onclick="openMo('registerMo')">List Your Property Free</button>
+      <a href="admin.html" class="btn btn-green btn-lg btn-full" style="max-width:320px;text-decoration:none;display:flex">⚙ Open Admin Panel</a>
+    </div>
+  </div></section>
+
+  <footer><div class="ft-in">
+    <div class="ft-g">
+      <div><div class="ft-br">🌿 GramVaas</div><p class="ft-ds">India's most trusted farmhouse booking platform across 36 states and UTs.</p></div>
+      <div class="ft-cl"><h4>Explore</h4><a>Rajasthan Farms</a><a>Maharashtra Villas</a><a>Kerala Homestays</a><a>Goa Farms</a></div>
+      <div class="ft-cl"><h4>Company</h4><a>About Us</a><a>Careers</a><a>Press</a><a>Blog</a></div>
+      <div class="ft-cl"><h4>Support</h4><a>Help Centre</a><a>Safety</a><a>Cancellation</a><a>Contact</a></div>
+    </div>
+    <div class="ft-bt"><span>© 2025 GramVaas Technologies Pvt. Ltd. | GST: 27AABCG1234A1Z1</span><span>Privacy · Terms · Sitemap</span></div>
+  </div></footer>
+</div>
+
+<!-- ====== LISTINGS ====== -->
+<div class="page" id="page-listings">
+  <div style="padding-top:var(--nav)">
+    <div class="ls-hd">
+      <h2>Explore Farmhouses</h2>
+      <button class="f-toggle" id="fToggle" onclick="togFilters()">⚙ Filters &amp; Search <span id="fArrow">▼</span></button>
+      <div class="f-panel hidden" id="fPanel">
+        <input type="text" id="lsQ" placeholder="🔍 Search name, city, state..." oninput="applyF()" style="min-width:180px;flex:1">
+        <select id="lsSt" onchange="lsCities();applyF()"><option value="">📍 All States</option></select>
+        <select id="lsCt" onchange="applyF()"><option value="">🏙 All Cities</option></select>
+        <select id="lsTp" onchange="applyF()"><option value="">🏡 All Types</option></select>
+        <select id="lsBg" onchange="applyF()">
+          <option value="">💰 Budget</option>
+          <option value="u3">Under ₹3,000</option>
+          <option value="38">₹3,000–₹8,000</option>
+          <option value="820">₹8,000–₹20,000</option>
+          <option value="a20">Above ₹20,000</option>
+        </select>
+        <div style="display:flex;gap:8px;width:100%">
+          <button class="btn btn-gold" style="flex:1;border-radius:10px" onclick="applyF()">Apply</button>
+          <button class="btn btn-sm" style="background:rgba(255,255,255,0.15);color:white;border:none;border-radius:10px;min-height:44px" onclick="clearF()">Clear</button>
+        </div>
+      </div>
+    </div>
+    <div class="si" style="padding:1.25rem">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.1rem;flex-wrap:wrap;gap:8px">
+        <div>
+          <p style="font-size:0.78rem;color:var(--bark)" id="lsCnt">Loading...</p>
+          <h2 style="font-family:'Playfair Display',serif;font-size:1.15rem;color:var(--dg)">All Farmhouses</h2>
+        </div>
+        <select id="sortBy" onchange="applyF()" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:0.82rem;background:white;color:var(--dark);min-height:40px;-webkit-appearance:none;appearance:none">
+          <option value="f">⬆ Featured</option>
+          <option value="pa">₹ Low→High</option>
+          <option value="pd">₹ High→Low</option>
+          <option value="r">⭐ Top Rated</option>
+          <option value="n">🆕 Newest</option>
+        </select>
+      </div>
+      <div class="g3" id="listGrid"></div>
+      <div id="noRes" style="display:none;text-align:center;padding:3rem 1rem;color:var(--bark)">
+        <div style="font-size:3rem;margin-bottom:1rem">🔍</div>
+        <h3 style="font-family:'Playfair Display',serif;color:var(--dg);margin-bottom:0.5rem">No properties found</h3>
+        <p style="font-size:0.875rem">Try adjusting filters or <button onclick="clearF()" style="background:none;border:none;color:var(--terra);font-family:'DM Sans',sans-serif;font-size:0.875rem;padding:0;cursor:pointer">clear all</button></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== DETAIL ====== -->
+<div class="page" id="page-detail">
+  <div id="detWrap" style="padding-top:var(--nav)"></div>
+</div>
+
+<!-- LOGIN MODAL -->
+<div class="mo hidden" id="loginMo" onclick="overlayClose(event,'loginMo')">
+  <div class="mb">
+    <div class="mb-handle"></div>
+    <button class="mc" onclick="closeMo('loginMo')">✕</button>
+    <h2>Welcome Back</h2><p>Sign in to your GramVaas account</p>
+    <div class="mg"><label>Email / Mobile</label><input type="text" placeholder="Email or mobile" autocomplete="username" inputmode="email"></div>
+    <div class="mg"><label>Password</label><input type="password" placeholder="Password" autocomplete="current-password"></div>
+    <button class="btn btn-primary btn-full" style="margin-bottom:1rem" onclick="doLogin()">Sign In</button>
+    <div class="dvd"><span>or</span></div>
+    <div class="gr2" style="margin-top:0.75rem">
+      <button class="btn btn-outline" onclick="doLogin()">🔵 Google</button>
+      <button class="btn btn-outline" onclick="doLogin()">📱 OTP Login</button>
+    </div>
+    <p style="text-align:center;margin-top:1.1rem;font-size:0.82rem;color:var(--bark)">New? <a href="#" style="color:var(--terra)" onclick="closeMo('loginMo');openMo('registerMo')">Create account</a></p>
+  </div>
+</div>
+
+<!-- REGISTER MODAL -->
+<div class="mo hidden" id="registerMo" onclick="overlayClose(event,'registerMo')">
+  <div class="mb">
+    <div class="mb-handle"></div>
+    <button class="mc" onclick="closeMo('registerMo')">✕</button>
+    <h2>List Your Property</h2><p>Join thousands of hosts earning on GramVaas</p>
+    <div class="gr2">
+      <div class="mg"><label>First Name</label><input type="text" placeholder="Rahul" autocomplete="given-name"></div>
+      <div class="mg"><label>Last Name</label><input type="text" placeholder="Sharma" autocomplete="family-name"></div>
+    </div>
+    <div class="mg"><label>Mobile *</label><input type="tel" placeholder="+91 9876543210" autocomplete="tel" inputmode="tel"></div>
+    <div class="mg"><label>Email *</label><input type="email" placeholder="email@example.com" autocomplete="email" inputmode="email"></div>
+    <div class="mg"><label>State</label><select id="rSt" onchange="rCities()"><option value="">Select State</option></select></div>
+    <div class="mg"><label>City</label><select id="rCt"><option value="">Select City</option></select></div>
+    <div class="mg"><label>Property Type</label><select><option>Farmhouse</option><option>Villa</option><option>Homestay</option><option>Glamping</option><option>Treehouse</option></select></div>
+    <button class="btn btn-primary btn-full" style="margin-top:0.5rem" onclick="doRegister()">Submit Application</button>
+  </div>
+</div>
+
+<!-- BOOKING MODAL -->
+<div class="mo hidden" id="bookingMo" onclick="overlayClose(event,'bookingMo')">
+  <div class="mb" id="bookingMoC"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============ ALL INDIA DATA ============
+const INDIA={
+  "Andhra Pradesh":["Visakhapatnam","Vijayawada","Guntur","Nellore","Kurnool","Tirupati","Rajahmundry","Kakinada","Eluru","Ongole","Amaravati","Srikakulam","Vizianagaram","Kadapa","Anantapur"],
+  "Arunachal Pradesh":["Itanagar","Naharlagun","Pasighat","Bomdila","Tawang","Ziro","Along","Tezu","Aalo"],
+  "Assam":["Guwahati","Silchar","Dibrugarh","Jorhat","Nagaon","Tinsukia","Tezpur","Bongaigaon","Dhubri","Diphu","Sivasagar","Goalpara","Karimganj","Barpeta"],
+  "Bihar":["Patna","Gaya","Bhagalpur","Muzaffarpur","Purnia","Darbhanga","Bihar Sharif","Arrah","Begusarai","Katihar","Munger","Chhapra","Saharsa","Sasaram","Hajipur"],
+  "Chhattisgarh":["Raipur","Bhilai","Bilaspur","Korba","Durg","Rajnandgaon","Jagdalpur","Ambikapur","Raigarh","Dhamtari"],
+  "Goa":["Panaji","Margao","Vasco da Gama","Mapusa","Ponda","Calangute","Baga","Anjuna","Arambol","Colva","Benaulim","Candolim"],
+  "Gujarat":["Ahmedabad","Surat","Vadodara","Rajkot","Bhavnagar","Jamnagar","Junagadh","Gandhinagar","Anand","Navsari","Morbi","Nadiad","Surendranagar","Bharuch","Mehsana","Porbandar","Dwarka","Somnath"],
+  "Haryana":["Faridabad","Gurugram","Rohtak","Hisar","Panipat","Ambala","Yamunanagar","Karnal","Sonipat","Panchkula","Kurukshetra","Bhiwani","Sirsa","Bahadurgarh","Jind"],
+  "Himachal Pradesh":["Shimla","Manali","Dharamshala","Solan","Kullu","Mandi","Palampur","Baddi","Nahan","Sundernagar","Chamba","Bilaspur","Una","Hamirpur","Kangra"],
+  "Jharkhand":["Ranchi","Jamshedpur","Dhanbad","Bokaro","Hazaribagh","Deoghar","Giridih","Ramgarh","Phusro","Medininagar"],
+  "Karnataka":["Bengaluru","Mysuru","Mangaluru","Hubballi","Belagavi","Kalaburagi","Ballari","Vijayapura","Coorg","Chikmagalur","Hampi","Dandeli","Udupi","Bidar","Tumkur","Dharwad","Shivamogga","Hassan","Madikeri","Sakleshpur"],
+  "Kerala":["Thiruvananthapuram","Kochi","Kozhikode","Thrissur","Kollam","Palakkad","Alappuzha","Kannur","Malappuram","Kottayam","Wayanad","Idukki","Munnar","Thekkady","Varkala","Kovalam","Kasaragod"],
+  "Madhya Pradesh":["Bhopal","Indore","Jabalpur","Gwalior","Ujjain","Sagar","Dewas","Satna","Ratlam","Rewa","Singrauli","Burhanpur","Khandwa","Chhindwara","Pachmarhi","Orchha"],
+  "Maharashtra":["Mumbai","Pune","Nagpur","Nashik","Aurangabad","Solapur","Amravati","Kolhapur","Malegaon","Nanded","Sangli","Jalgaon","Akola","Latur","Dhule","Ahmednagar","Lonavala","Alibaug","Mahabaleshwar","Matheran","Ratnagiri","Sindhudurg","Palghar","Karjat","Khopoli","Igatpuri"],
+  "Manipur":["Imphal","Thoubal","Churachandpur","Bishnupur","Senapati","Ukhrul","Tamenglong"],
+  "Meghalaya":["Shillong","Tura","Jowai","Nongstoin","Cherrapunji","Mawlynnong"],
+  "Mizoram":["Aizawl","Lunglei","Champhai","Kolasib","Serchhip","Lawngtlai"],
+  "Nagaland":["Kohima","Dimapur","Mokokchung","Tuensang","Wokha","Zunheboto","Phek"],
+  "Odisha":["Bhubaneswar","Cuttack","Rourkela","Brahmapur","Sambalpur","Puri","Balasore","Bhadrak","Baripada","Jharsuguda","Konark","Chilika"],
+  "Punjab":["Ludhiana","Amritsar","Jalandhar","Patiala","Bathinda","Mohali","Hoshiarpur","Batala","Pathankot","Moga","Abohar","Malerkotla","Khanna"],
+  "Rajasthan":["Jaipur","Jodhpur","Udaipur","Kota","Bikaner","Ajmer","Alwar","Bharatpur","Jhunjhunu","Sikar","Bhilwara","Pali","Chittorgarh","Bundi","Dungarpur","Tonk","Sawai Madhopur","Pushkar","Ranthambore","Mount Abu","Jaisalmer","Barmer","Nagaur"],
+  "Sikkim":["Gangtok","Namchi","Geyzing","Mangan","Jorethang","Ravangla","Pelling","Yuksom"],
+  "Tamil Nadu":["Chennai","Coimbatore","Madurai","Tiruchirappalli","Salem","Tirunelveli","Tiruppur","Vellore","Erode","Thoothukudi","Ooty","Kodaikanal","Yelagiri","Valparai","Mahabalipuram","Rameswaram","Thanjavur","Kanchipuram"],
+  "Telangana":["Hyderabad","Warangal","Nizamabad","Khammam","Karimnagar","Ramagundam","Mahbubnagar","Nalgonda","Medak","Adilabad","Sangareddy"],
+  "Tripura":["Agartala","Dharmanagar","Udaipur","Kailasahar","Belonia","Sabroom"],
+  "Uttar Pradesh":["Lucknow","Agra","Kanpur","Varanasi","Prayagraj","Meerut","Bareilly","Aligarh","Moradabad","Saharanpur","Gorakhpur","Firozabad","Jhansi","Muzaffarnagar","Mathura","Vrindavan","Noida","Ghaziabad","Ayodhya"],
+  "Uttarakhand":["Dehradun","Haridwar","Roorkee","Haldwani","Rudrapur","Rishikesh","Mussoorie","Nainital","Jim Corbett","Lansdowne","Auli","Chopta","Chakrata","Munsyari","Pangot","Bhimtal","Ranikhet"],
+  "West Bengal":["Kolkata","Howrah","Durgapur","Asansol","Siliguri","Bardhaman","Malda","Baharampur","Darjeeling","Kalimpong","Murshidabad","Purulia","Cooch Behar","Haldia"],
+  "Delhi":["New Delhi","Dwarka","Rohini","Saket","Vasant Kunj","Mehrauli","Chattarpur","Noida Extension"],
+  "Jammu & Kashmir":["Srinagar","Jammu","Gulmarg","Pahalgam","Sonmarg","Poonch","Rajouri","Anantnag","Baramulla"],
+  "Ladakh":["Leh","Kargil","Nubra Valley","Pangong","Zanskar","Hanle"],
+  "Chandigarh":["Chandigarh","Mohali","Panchkula"],
+  "Puducherry":["Puducherry","Karaikal","Mahe","Yanam"],
+  "Andaman & Nicobar Islands":["Port Blair","Havelock Island","Neil Island","Car Nicobar"],
+  "Lakshadweep":["Kavaratti","Agatti","Minicoy","Amini"],
+  "Dadra & Nagar Haveli and Daman & Diu":["Silvassa","Daman","Diu"]
+};
+const TYPES=["Farmhouse","Villa","Homestay","Glamping","Treehouse","Heritage Haveli","Eco Resort","Tent Camp","Lake House","Beach Cottage","Mountain Cabin","Working Farm"];
+
+// ============ STORAGE ============
+const getProps=()=>{try{return JSON.parse(localStorage.getItem('gv_properties')||'[]').filter(p=>p.active&&!p.draft)}catch{return[]}};
+const saveBk=bk=>{try{const a=JSON.parse(localStorage.getItem('gv_bookings')||'[]');a.unshift(bk);localStorage.setItem('gv_bookings',JSON.stringify(a))}catch{}};
+
+// ============ STATE ============
+let wl=new Set(JSON.parse(localStorage.getItem('gv_wishlist')||'[]'));
+
+// ============ MOBILE NAV ============
+function togMenu(){
+  const h=document.getElementById('hbg'),m=document.getElementById('mobOverlay');
+  h.classList.toggle('open');m.classList.toggle('open');
+  document.body.style.overflow=m.classList.contains('open')?'hidden':'';
+}
+function closeOverlay(e){if(e.target.id==='mobOverlay')togMenu()}
+function setBar(id){
+  document.querySelectorAll('.bn-item').forEach(x=>x.classList.remove('on'));
+  const el=document.getElementById('bn-'+id);if(el)el.classList.add('on');
+}
+
+// ============ FILTERS ============
+let filOpen=false;
+function togFilters(){
+  filOpen=!filOpen;
+  document.getElementById('fPanel').classList.toggle('hidden',!filOpen);
+  document.getElementById('fArrow').textContent=filOpen?'▲':'▼';
+}
+function showDesktopFilters(){
+  if(window.innerWidth>768){const p=document.getElementById('fPanel');if(p)p.classList.remove('hidden')}
+}
+
+// ============ DROPDOWNS ============
+function fillSt(ids){
+  const states=Object.keys(INDIA);
+  ids.forEach(id=>{
+    const el=document.getElementById(id);if(!el)return;
+    const f=el.options[0].cloneNode(true);el.innerHTML='';el.appendChild(f);
+    states.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;el.appendChild(o)});
+  });
+}
+function fillTp(ids){
+  ids.forEach(id=>{
+    const el=document.getElementById(id);if(!el)return;
+    const f=el.options[0].cloneNode(true);el.innerHTML='';el.appendChild(f);
+    TYPES.forEach(t=>{const o=document.createElement('option');o.value=t;o.textContent=t;el.appendChild(o)});
+  });
+}
+function setCities(stId,ctId,sel=''){
+  const s=(document.getElementById(stId)||{}).value||'';
+  const cities=INDIA[s]||[];
+  const el=document.getElementById(ctId);if(!el)return;
+  const f=el.options[0].cloneNode(true);el.innerHTML='';el.appendChild(f);
+  cities.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;if(c===sel)o.selected=true;el.appendChild(o)});
+}
+function hCities(){setCities('hSt','hCt')}
+function lsCities(){setCities('lsSt','lsCt');applyF()}
+function rCities(){setCities('rSt','rCt')}
+
+// ============ NAVIGATION ============
+function goPage(pg){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+pg).classList.add('active');
+  document.body.style.overflow='';
+  window.scrollTo({top:0,behavior:'smooth'});
+  const m=document.getElementById('mobOverlay');
+  if(m&&m.classList.contains('open'))togMenu();
+  if(pg==='home'){renderFeat();updN()}
+  if(pg==='listings'){showDesktopFilters();renderList(getProps())}
+}
+function updN(){const n=getProps().length;const el=document.getElementById('heroN');if(el)el.textContent=n>0?n+'+':'2,400+'}
+
+// ============ SEARCH ============
+function doSearch(){
+  goPage('listings');setBar('explore');
+  const st=document.getElementById('hSt').value,ct=document.getElementById('hCt').value,tp=document.getElementById('hTp').value;
+  if(st){const el=document.getElementById('lsSt');if(el){el.value=st;lsCities()}}
+  setTimeout(()=>{
+    if(ct){const el=document.getElementById('lsCt');if(el)el.value=ct}
+    if(tp){const el=document.getElementById('lsTp');if(el)el.value=tp}
+    applyF();
+  },80);
+}
+function applyF(){
+  const q=((document.getElementById('lsQ')||{}).value||'').toLowerCase();
+  const st=(document.getElementById('lsSt')||{}).value||'';
+  const ct=(document.getElementById('lsCt')||{}).value||'';
+  const tp=(document.getElementById('lsTp')||{}).value||'';
+  const bg=(document.getElementById('lsBg')||{}).value||'';
+  const so=(document.getElementById('sortBy')||{}).value||'f';
+  let p=getProps().filter(x=>{
+    const mq=!q||(x.name.toLowerCase().includes(q)||x.city.toLowerCase().includes(q)||x.state.toLowerCase().includes(q)||(x.type||'').toLowerCase().includes(q));
+    const ms=!st||x.state===st,mc=!ct||x.city===ct,mt=!tp||x.type===tp;
+    let mb=true;
+    if(bg==='u3')mb=x.price<3000;else if(bg==='38')mb=x.price>=3000&&x.price<=8000;
+    else if(bg==='820')mb=x.price>8000&&x.price<=20000;else if(bg==='a20')mb=x.price>20000;
+    return mq&&ms&&mc&&mt&&mb;
+  });
+  if(so==='pa')p.sort((a,b)=>a.price-b.price);else if(so==='pd')p.sort((a,b)=>b.price-a.price);
+  else if(so==='r')p.sort((a,b)=>b.rating-a.rating);else if(so==='n')p.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  renderList(p);
+}
+function clearF(){['lsQ','lsSt','lsCt','lsTp','lsBg'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});renderList(getProps())}
+function catFilter(btn,tp){document.querySelectorAll('.cat').forEach(c=>c.classList.remove('on'));btn.classList.add('on');renderFeatG(tp?getProps().filter(p=>p.type===tp):getProps())}
+
+// ============ RENDER CARDS ============
+function pCard(p){
+  const w=wl.has(p.id);
+  const bc={'Premium':'pb1','New':'pb2','Popular':'pb3','Bestseller':'pb4','Featured':'pb1'}[p.badge]||'pb2';
+  const img=p.photos&&p.photos.length?`<img src="${p.photos[0]}" alt="${p.name}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" loading="lazy">`:`<span style="font-size:4rem;opacity:0.5">${p.emoji||'🏡'}</span>`;
+  return`<div class="pc" onclick="showDet('${p.id}')">
+    <div class="pc-img">${img}${p.badge?`<span class="pc-b ${bc}">${p.badge}</span>`:''}<button class="pc-w ${w?'on':''}" onclick="event.stopPropagation();togWl('${p.id}',this)">♡</button></div>
+    <div class="pc-bd">
+      <p class="pc-loc">📍 ${p.city}, ${p.state}</p>
+      <h3 class="pc-nm">${p.name}</h3>
+      <div class="pc-mt"><span>🛏 ${p.rooms||'—'} rooms</span><span>👥 ${p.guests} guests</span><span>🚿 ${p.baths||'—'} baths</span></div>
+      <div class="pc-am">${(p.amenities||[]).slice(0,3).map(a=>`<span class="at">${a}</span>`).join('')}${p.amenities&&p.amenities.length>3?`<span class="at">+${p.amenities.length-3}</span>`:''}</div>
+      <div class="pc-ft"><div class="pc-pr"><span class="amt">₹${Number(p.price).toLocaleString('en-IN')}</span><span class="per">/night</span></div><div class="pc-rt">⭐ ${p.rating||4.5} <span style="color:var(--bark)">(${p.reviews||0})</span></div></div>
+    </div></div>`;
+}
+function renderFeat(){renderFeatG(getProps())}
+function renderFeatG(p){
+  const g=document.getElementById('featGrid');
+  if(g)g.innerHTML=p.length?p.slice(0,6).map(pCard).join(''):`<div style="grid-column:1/-1;text-align:center;padding:2.5rem;color:var(--bark)"><div style="font-size:3rem;margin-bottom:1rem">🏡</div><p>No properties yet.<br><a href="admin.html" style="color:var(--terra)">Add from Admin Panel →</a></p></div>`;
+}
+function renderList(p){
+  const g=document.getElementById('listGrid'),nr=document.getElementById('noRes'),c=document.getElementById('lsCnt');
+  if(c)c.textContent=`Showing ${p.length} ${p.length===1?'property':'properties'}`;
+  if(!p.length){if(g)g.innerHTML='';if(nr)nr.style.display='block';return}
+  if(nr)nr.style.display='none';
+  if(g)g.innerHTML=p.map(pCard).join('');
+}
+
+// ============ WISHLIST ============
+function togWl(id,btn){
+  if(wl.has(id)){wl.delete(id);btn.classList.remove('on');btn.textContent='♡';toast('Removed from wishlist')}
+  else{wl.add(id);btn.classList.add('on');btn.textContent='❤';toast('❤ Added to wishlist!')}
+  localStorage.setItem('gv_wishlist',JSON.stringify([...wl]));
+}
+
+// ============ DETAIL ============
+function showDet(id){
+  const p=getProps().find(x=>x.id===id);
+  if(!p){toast('Property not found');return}
+  const photos=p.photos||[],hp=photos.length>0;
+  const gMain=hp?`<img src="${photos[0]}" alt="${p.name}" class="cv" id="gMain">`:`<span class="ef">${p.emoji||'🏡'}</span>`;
+  const thumbs=hp?photos.map((s,i)=>`<div class="g-th ${i===0?'on':''}" onclick="swGal(${i},'${id}')"><img src="${s}" alt="${i+1}" loading="lazy"></div>`).join(''):`<div class="g-th-e">${p.emoji||'🏡'}</div>`;
+  document.getElementById('detWrap').innerHTML=`
+    <div class="dg">${gMain}<div class="d-ov"></div>
+      <button onclick="goPage('listings')" style="position:absolute;top:calc(var(--nav) + 10px);left:1rem;background:white;border:none;padding:9px 16px;border-radius:50px;cursor:pointer;font-weight:500;font-size:0.85rem;z-index:10;box-shadow:0 2px 10px rgba(0,0,0,0.2)">← Back</button>
+    </div>
+    <div class="g-thumbs">${thumbs}</div>
+    <div class="d-in">
+      <div>
+        <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:0.85rem">
+          ${p.badge?`<span style="background:var(--gold);color:var(--dark);padding:4px 12px;border-radius:50px;font-size:0.68rem;font-weight:600">${p.badge}</span>`:''}
+          <span style="background:rgba(28,58,42,0.1);color:var(--dg);padding:4px 12px;border-radius:50px;font-size:0.68rem;font-weight:600">${p.type}</span>
+        </div>
+        <h1 style="font-family:'Playfair Display',serif;font-size:clamp(1.5rem,5vw,2.1rem);color:var(--dg);margin-bottom:0.4rem;line-height:1.2">${p.name}</h1>
+        <p style="color:var(--bark);margin-bottom:1.1rem;font-size:0.85rem">📍 ${p.city}, ${p.state} &nbsp;·&nbsp; ⭐ ${p.rating||4.5} (${p.reviews||0} reviews)</p>
+        <div class="ds-row">
+          <div class="ds"><div class="v">${p.guests}</div><div class="l">Guests</div></div>
+          <div class="ds"><div class="v">${p.rooms||'—'}</div><div class="l">Bedrooms</div></div>
+          <div class="ds"><div class="v">${p.baths||'—'}</div><div class="l">Bathrooms</div></div>
+          <div class="ds"><div class="v">⭐${p.rating||4.5}</div><div class="l">Rating</div></div>
+        </div>
+        <p style="font-size:0.88rem;line-height:1.85;color:var(--dark);margin-bottom:1.5rem">${p.desc||'No description provided.'}</p>
+        <h3 style="font-family:'Playfair Display',serif;font-size:1rem;color:var(--dg);margin-bottom:0.75rem">Amenities</h3>
+        <div class="ag">${(p.amenities||[]).map(a=>`<div class="ai">✅ ${a}</div>`).join('')||'<p style="color:var(--bark);font-size:0.875rem;grid-column:1/-1">No amenities listed.</p>'}</div>
+        ${p.address?`<h3 style="font-family:'Playfair Display',serif;font-size:1rem;color:var(--dg);margin-bottom:0.6rem">Address</h3><div style="background:var(--sand);padding:1rem;border-radius:10px;font-size:0.85rem">📍 ${p.address}</div>`:''}
+      </div>
+      <!-- DESKTOP BOOKING CARD -->
+      <div>
+        <div class="bk-card">
+          <div class="bk-pr">₹${Number(p.price).toLocaleString('en-IN')} <span>/ night</span></div>
+          <div class="bk-form">
+            <div><label>Check-in</label><input type="date" id="dCI" onchange="calcP(${p.price})" min="${new Date().toISOString().split('T')[0]}"></div>
+            <div><label>Check-out</label><input type="date" id="dCO" onchange="calcP(${p.price})" min="${new Date().toISOString().split('T')[0]}"></div>
+            <div><label>Guests</label><select>${Array.from({length:Math.min(p.guests,20)},(_,i)=>`<option>${i+1} Guest${i>0?'s':''}</option>`).join('')}</select></div>
+          </div>
+          <div class="pb" id="pbB" style="display:none">
+            <div class="pb-row"><span id="pbN">—</span><span id="pbBs">—</span></div>
+            <div class="pb-row"><span>Cleaning fee</span><span>₹500</span></div>
+            <div class="pb-row"><span>GST (18%)</span><span id="pbG">—</span></div>
+            <div class="pb-tot"><span>Total</span><span id="pbT">—</span></div>
+          </div>
+          <button class="btn btn-primary btn-full" style="margin-top:1rem" onclick="openBk('${p.id}')">🏡 Reserve Now</button>
+          <p style="text-align:center;font-size:0.7rem;color:var(--bark);margin-top:0.6rem">You won't be charged yet</p>
+          <div style="margin-top:1.1rem;padding-top:1rem;border-top:1px solid var(--border);font-size:0.75rem;color:var(--bark);display:flex;flex-direction:column;gap:5px">
+            <span>✅ Free cancellation till 7 days before check-in</span>
+            <span>📱 Instant confirmation via SMS & email</span>
+            <span>🧾 GST invoice auto-generated</span>
+            <span>🔒 Secure via Razorpay · PCI-DSS</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- MOBILE STICKY BOOK -->
+    <div class="stick-book" id="sBook">
+      <div style="flex:1">
+        <div class="sb-price">₹${Number(p.price).toLocaleString('en-IN')} <small>/night</small></div>
+        <div style="font-size:0.7rem;color:var(--bark)">⭐ ${p.rating||4.5} · ${p.city}</div>
+      </div>
+      <button class="btn btn-primary" onclick="openBk('${p.id}')" style="flex-shrink:0;padding:12px 22px">Reserve Now</button>
+    </div>`;
+  goPage('detail');setBar('explore');
+}
+
+function swGal(idx,propId){
+  const p=getProps().find(x=>x.id===propId);
+  if(!p||!p.photos||!p.photos[idx])return;
+  const m=document.getElementById('gMain');if(m)m.src=p.photos[idx];
+  document.querySelectorAll('.g-th').forEach((t,i)=>t.classList.toggle('on',i===idx));
+}
+function calcP(ppn){
+  const ci=(document.getElementById('dCI')||{}).value,co=(document.getElementById('dCO')||{}).value;
+  if(!ci||!co)return;
+  const n=Math.max(1,Math.round((new Date(co)-new Date(ci))/86400000));
+  const b=n*ppn,g=Math.round(b*0.18),t=b+g+500;
+  const pb=document.getElementById('pbB');if(pb)pb.style.display='block';
+  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v};
+  set('pbN',`${n} night${n>1?'s':''} × ₹${ppn.toLocaleString('en-IN')}`);
+  set('pbBs',`₹${b.toLocaleString('en-IN')}`);
+  set('pbG',`₹${g.toLocaleString('en-IN')}`);
+  set('pbT',`₹${t.toLocaleString('en-IN')}`);
+}
+
+// ============ BOOKING ============
+function openBk(propId){
+  const p=getProps().find(x=>x.id===propId);if(!p){toast('Property not found');return}
+  const ci=(document.getElementById('dCI')||{}).value||'',co=(document.getElementById('dCO')||{}).value||'';
+  document.getElementById('bookingMoC').innerHTML=`
+    <div class="mb-handle"></div>
+    <button class="mc" onclick="closeMo('bookingMo')">✕</button>
+    <h2>Confirm Booking</h2>
+    <p>${p.name} · ${p.city}, ${p.state}</p>
+    <div class="mg"><label>Full Name *</label><input type="text" id="bkN" placeholder="As per ID" autocomplete="name"></div>
+    <div class="mg"><label>Mobile *</label><input type="tel" id="bkP" placeholder="+91 9876543210" autocomplete="tel" inputmode="tel"></div>
+    <div class="mg"><label>Email *</label><input type="email" id="bkE" placeholder="you@example.com" autocomplete="email" inputmode="email"></div>
+    <div class="gr2">
+      <div class="mg"><label>Check-in *</label><input type="date" id="bkCI" value="${ci}" onchange="recalc(${p.price})" min="${new Date().toISOString().split('T')[0]}"></div>
+      <div class="mg"><label>Check-out *</label><input type="date" id="bkCO" value="${co}" onchange="recalc(${p.price})" min="${new Date().toISOString().split('T')[0]}"></div>
+    </div>
+    <div class="mg"><label>Guests</label><select id="bkG">${Array.from({length:p.guests},(_,i)=>`<option>${i+1}</option>`).join('')}</select></div>
+    <div class="mg"><label>Special Requests</label><textarea placeholder="Dietary needs, late arrival, celebration decorations..."></textarea></div>
+    <div style="background:var(--sand);border-radius:11px;padding:1rem;margin-bottom:1rem" id="bkPB">
+      <div id="bkPS" style="font-size:0.875rem;color:var(--bark);text-align:center">📅 Select check-in and check-out to see price</div>
+    </div>
+    <p style="font-size:0.7rem;font-weight:600;color:var(--olive);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px">Pay via</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1rem" id="pmG">
+      ${['📲 UPI','💳 Card','🏦 Net Banking','📅 EMI'].map(m=>`<button onclick="selP(this)" style="padding:12px 6px;border:1.5px solid var(--border);border-radius:10px;background:white;cursor:pointer;font-size:0.8rem;min-height:44px">${m}</button>`).join('')}
+    </div>
+    <button class="btn btn-primary btn-full" onclick="confirmBk('${p.id}','${p.name}',${p.price})">🔒 Pay & Confirm Booking</button>
+    <p style="text-align:center;font-size:0.7rem;color:var(--bark);margin-top:0.75rem">Powered by Razorpay · PCI-DSS · GST Invoice</p>`;
+  openMo('bookingMo');
+  if(ci&&co)recalc(p.price);
+}
+
+function recalc(ppn){
+  const ci=(document.getElementById('bkCI')||{}).value,co=(document.getElementById('bkCO')||{}).value;
+  const box=document.getElementById('bkPS');if(!box)return;
+  if(!ci||!co){box.innerHTML='<span style="color:var(--bark);font-size:0.875rem">📅 Select both dates to see price</span>';return}
+  const d1=new Date(ci),d2=new Date(co);
+  if(d2<=d1){box.innerHTML='<span style="color:var(--terra);font-size:0.875rem">⚠️ Check-out must be after check-in</span>';return}
+  const n=Math.round((d2-d1)/86400000),b=n*ppn,g=Math.round(b*0.18),t=b+g+500;
+  box.innerHTML=`
+    <div style="display:flex;justify-content:space-between;margin-bottom:5px;font-size:0.875rem"><span>${n} night${n>1?'s':''} × ₹${ppn.toLocaleString('en-IN')}</span><span style="font-weight:500">₹${b.toLocaleString('en-IN')}</span></div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:5px;font-size:0.875rem"><span>Cleaning fee</span><span style="font-weight:500">₹500</span></div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:5px;font-size:0.875rem"><span>GST (18%)</span><span style="font-weight:500">₹${g.toLocaleString('en-IN')}</span></div>
+    <div style="display:flex;justify-content:space-between;font-weight:700;font-size:0.95rem;padding-top:8px;border-top:1px solid var(--border)"><span>Total</span><span style="color:var(--dg)">₹${t.toLocaleString('en-IN')}</span></div>`;
+}
+function selP(btn){document.querySelectorAll('#pmG button').forEach(b=>{b.style.borderColor='var(--border)';b.style.background='white'});btn.style.borderColor='var(--terra)';btn.style.background='rgba(194,98,63,0.07)'}
+function confirmBk(pid,pname,ppn){
+  const nm=(document.getElementById('bkN')||{}).value?.trim();
+  const ph=(document.getElementById('bkP')||{}).value?.trim();
+  const em=(document.getElementById('bkE')||{}).value?.trim();
+  const ci=(document.getElementById('bkCI')||{}).value;
+  const co=(document.getElementById('bkCO')||{}).value;
+  if(!nm||!ph||!em){toast('⚠️ Please fill Name, Mobile, and Email');return}
+  if(!ci||!co){toast('⚠️ Please select Check-in and Check-out dates');return}
+  if(new Date(co)<=new Date(ci)){toast('⚠️ Check-out must be after check-in');return}
+  const n=Math.round((new Date(co)-new Date(ci))/86400000);
+  const amt=Math.round(n*(ppn||0)*1.18+500);
+  const sb=document.querySelector('#pmG button[style*="terra"]');
+  saveBk({id:'BK-'+Date.now(),guestName:nm,guestEmail:em,guestPhone:ph,propId:pid,propName:pname,checkin:ci,checkout:co,nights:n,guests:parseInt((document.getElementById('bkG')||{}).value)||1,amount:amt,status:'confirmed',payment:sb?sb.textContent.replace(/[^\w ]/g,'').trim():'Online',createdAt:Date.now()});
+  closeMo('bookingMo');
+  setTimeout(()=>toast('🎉 Booking Confirmed! Details sent to your email.'),300);
+}
+
+// ============ MODALS ============
+function openMo(id){document.getElementById(id).classList.remove('hidden');document.body.style.overflow='hidden'}
+function closeMo(id){document.getElementById(id).classList.add('hidden');document.body.style.overflow=''}
+function overlayClose(e,id){if(e.target.id===id)closeMo(id)}
+function doLogin(){closeMo('loginMo');toast('✅ Welcome back!')}
+function doRegister(){closeMo('registerMo');toast('🎉 Application submitted! We\'ll contact you in 24h.')}
+
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// ============ STORAGE LISTENER ============
+window.addEventListener('storage',e=>{
+  if(e.key==='gv_updated'||e.key==='gv_properties'){
+    if(document.getElementById('page-home').classList.contains('active'))renderFeat();
+    if(document.getElementById('page-listings').classList.contains('active'))applyF();
+    updN();
+  }
+});
+
+// ============ INIT ============
+document.addEventListener('DOMContentLoaded',()=>{
+  fillSt(['hSt','lsSt','rSt']);
+  fillTp(['hTp','lsTp']);
+  const today=new Date().toISOString().split('T')[0];
+  const tom=new Date(Date.now()+86400000).toISOString().split('T')[0];
+  ['hCI'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=today});
+  ['hCO'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=tom});
+  renderFeat();updN();showDesktopFilters();
+  // Escape key closes modal
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape')['loginMo','registerMo','bookingMo'].forEach(id=>{const m=document.getElementById(id);if(m&&!m.classList.contains('hidden'))closeMo(id)});
+  });
+  // Swipe down to close bottom sheet
+  let ty=0;
+  document.addEventListener('touchstart',e=>{ty=e.touches[0].clientY},{passive:true});
+  document.addEventListener('touchend',e=>{
+    if(e.changedTouches[0].clientY-ty>90){
+      ['loginMo','registerMo','bookingMo'].forEach(id=>{
+        const m=document.getElementById(id);
+        if(m&&!m.classList.contains('hidden')){
+          const mb=m.querySelector('.mb');
+          if(mb&&mb.scrollTop===0)closeMo(id);
+        }
+      });
+    }
+  },{passive:true});
+  // Resize: show desktop filters
+  window.addEventListener('resize',showDesktopFilters);
+});
+</script>
+</body>
+</html>
