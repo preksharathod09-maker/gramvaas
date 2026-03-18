@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>GramVaas — Admin Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--dg:#1C3A2A;--olive:#4A6741;--terra:#C2623F;--gold:#D4A843;--cream:#FAF6EE;--sand:#F5EDD6;--bark:#7A5C3A;--border:#E2D5BE;--shadow:rgba(28,58,42,0.12)}
+body{font-family:'DM Sans',sans-serif;background:#F0EDE6;color:#1a1a1a;display:flex;min-height:100vh}
+/* LOGIN */
+#loginScreen{position:fixed;inset:0;z-index:9999;background:var(--dg);display:flex;align-items:center;justify-content:center;padding:1rem}
+#loginScreen.hidden{display:none}
+.lc{background:white;border-radius:24px;padding:2.5rem 2rem;width:100%;max-width:400px;box-shadow:0 30px 80px rgba(0,0,0,0.4)}
+.l-logo{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:var(--dg);text-align:center;margin-bottom:0.2rem}
+.l-logo span{color:var(--terra)}
+.l-sub{text-align:center;font-size:0.75rem;color:var(--bark);margin-bottom:2rem;text-transform:uppercase;letter-spacing:0.08em}
+.l-lbl{display:block;font-size:0.72rem;font-weight:600;color:var(--olive);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:5px}
+.l-wrap{position:relative;margin-bottom:1rem}
+.l-inp{width:100%;padding:13px 44px 13px 14px;border:1.5px solid var(--border);border-radius:11px;font-family:'DM Sans',sans-serif;font-size:1rem;background:var(--cream);outline:none;transition:border 0.2s}
+.l-inp:focus{border-color:var(--olive)}
+.l-eye{position:absolute;right:13px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1rem;color:var(--bark)}
+.l-btn{width:100%;padding:13px;background:var(--terra);color:white;border:none;border-radius:11px;font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:600;cursor:pointer;transition:background 0.2s}
+.l-btn:hover{background:#A8522E}
+.l-err{background:#FEE8E8;color:#C0392B;padding:10px 14px;border-radius:9px;font-size:0.85rem;margin-bottom:1rem;display:none;text-align:center}
+.l-err.show{display:block}
+.l-lock{background:#FFF3E0;color:#C47B00;padding:10px 14px;border-radius:9px;font-size:0.85rem;margin-bottom:1rem;display:none;text-align:center}
+.l-lock.show{display:block}
+.l-info{text-align:center;font-size:0.75rem;color:var(--bark);margin-top:1rem;min-height:18px}
+.shake{animation:shk 0.4s ease}
+@keyframes shk{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+/* SIDEBAR */
+.sidebar{width:260px;background:var(--dg);min-height:100vh;position:fixed;left:0;top:0;bottom:0;display:flex;flex-direction:column;z-index:100;overflow-y:auto}
+.sidebar-logo{padding:1.5rem;border-bottom:1px solid rgba(255,255,255,0.1)}
+.brand{font-family:'Playfair Display',serif;font-size:1.4rem;color:var(--cream)}
+.brand span{color:var(--gold)}
+.sub-lbl{font-size:0.7rem;color:rgba(245,237,214,0.45);margin-top:2px;text-transform:uppercase;letter-spacing:0.1em}
+.nav-sec{padding:1rem 0 0.4rem 1rem;font-size:0.66rem;text-transform:uppercase;letter-spacing:0.12em;color:rgba(245,237,214,0.38)}
+.nav-item{display:flex;align-items:center;gap:10px;padding:11px 1.5rem;color:rgba(245,237,214,0.7);font-size:0.875rem;font-weight:500;cursor:pointer;transition:all 0.18s;border-left:3px solid transparent;user-select:none}
+.nav-item:hover{color:var(--cream);background:rgba(255,255,255,0.07)}
+.nav-item.active{color:var(--cream);background:rgba(255,255,255,0.12);border-left-color:var(--gold)}
+.ico{width:20px;text-align:center;font-size:1rem}
+.sidebar-bot{margin-top:auto;padding:1.5rem;border-top:1px solid rgba(255,255,255,0.1)}
+.ab{display:flex;align-items:center;gap:10px}
+.av{width:38px;height:38px;border-radius:50%;background:var(--terra);display:flex;align-items:center;justify-content:center;font-weight:700;color:white;font-size:0.85rem}
+.an{font-size:0.88rem;font-weight:600;color:var(--cream)}
+.ar{font-size:0.72rem;color:rgba(245,237,214,0.45)}
+.logout-btn{margin-top:1rem;width:100%;padding:9px;background:rgba(194,98,63,0.15);color:#F5A58A;border:1px solid rgba(194,98,63,0.35);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.2s}
+.logout-btn:hover{background:rgba(194,98,63,0.3)}
+/* MAIN */
+.main{margin-left:260px;flex:1;min-height:100vh}
+.topbar{background:white;border-bottom:1px solid var(--border);padding:0 2rem;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.topbar-title{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--dg)}
+.topbar-right{display:flex;align-items:center;gap:1rem}
+.notif-btn{position:relative;background:none;border:none;cursor:pointer;font-size:1.2rem;padding:6px}
+.notif-dot{position:absolute;top:4px;right:4px;width:8px;height:8px;background:var(--terra);border-radius:50%;border:2px solid white}
+.view-btn{padding:8px 18px;background:var(--dg);color:white;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.82rem;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.content{padding:2rem}
+/* CARDS */
+.card{background:white;border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px var(--shadow);margin-bottom:1.5rem}
+.card-title{font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--dg);padding-bottom:1rem;margin-bottom:1.25rem;border-bottom:1px solid var(--border)}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.25rem;margin-bottom:1.5rem}
+.stat-card{background:white;border-radius:14px;padding:1.25rem 1.5rem;box-shadow:0 2px 12px var(--shadow);border-left:4px solid var(--dg)}
+.stat-card.terra{border-left-color:var(--terra)}.stat-card.gold{border-left-color:var(--gold)}.stat-card.olive{border-left-color:var(--olive)}
+.s-lbl{font-size:0.75rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--bark);margin-bottom:6px}
+.s-val{font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;color:var(--dg)}
+.s-chg{font-size:0.78rem;margin-top:4px}
+.up{color:#2D9E6A}
+table{width:100%;border-collapse:collapse}
+thead th{font-size:0.73rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--bark);padding:10px 12px;background:#F7F4EE;text-align:left;white-space:nowrap}
+tbody td{padding:12px;font-size:0.875rem;border-bottom:1px solid #F0EDE6;vertical-align:middle}
+tbody tr:hover{background:#FAFAF7}
+.bdg{display:inline-flex;padding:3px 10px;border-radius:50px;font-size:0.72rem;font-weight:600}
+.b-ok{background:#E6F7EE;color:#1B7A4A}.b-warn{background:#FFF3E0;color:#C47B00}.b-err{background:#FEE8E8;color:#C0392B}.b-info{background:#E6F0FB;color:#1A5FAD}.b-gray{background:#F0EDE6;color:#7A5C3A}
+/* BUTTONS */
+.btn{padding:10px 22px;border-radius:50px;font-family:'DM Sans',sans-serif;font-size:0.875rem;font-weight:500;cursor:pointer;transition:all 0.2s;border:none;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:var(--terra);color:white}.btn-primary:hover{background:#A8522E}
+.btn-green{background:var(--dg);color:white}.btn-green:hover{background:#122A1C}
+.btn-outline{background:transparent;border:1.5px solid var(--dg);color:var(--dg)}.btn-outline:hover{background:var(--dg);color:white}
+.btn-danger{background:#FEE8E8;color:#C0392B;border:none}.btn-sm{padding:6px 14px;font-size:0.78rem;border-radius:8px}
+/* FORM */
+.fg{display:flex;flex-direction:column;gap:5px;margin-bottom:1rem}
+.fg label{font-size:0.78rem;font-weight:600;color:var(--olive);text-transform:uppercase;letter-spacing:0.05em}
+.fg input,.fg select,.fg textarea{padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:0.9rem;color:#1a1a1a;background:var(--cream);width:100%}
+.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--olive)}
+.fg textarea{resize:vertical;min-height:90px}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.fgrid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem}
+/* SEARCH */
+.search-bar{display:flex;align-items:center;gap:10px;margin-bottom:1.5rem;flex-wrap:wrap}
+.search-bar input,.search-bar select{padding:10px 14px;border:1.5px solid var(--border);border-radius:50px;font-family:'DM Sans',sans-serif;font-size:0.875rem;background:white}
+.search-bar input{flex:1;min-width:180px}
+.search-bar input:focus,.search-bar select:focus{outline:none;border-color:var(--olive)}
+/* PHOTO UPLOAD */
+.photo-zone{border:2px dashed var(--border);border-radius:14px;padding:2rem;text-align:center;cursor:pointer;transition:all 0.2s;background:var(--cream)}
+.photo-zone:hover{border-color:var(--olive);background:rgba(74,103,65,0.05)}
+.photo-zone input[type=file]{display:none}
+.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;margin-top:1rem}
+.photo-item{position:relative;border-radius:10px;overflow:hidden;aspect-ratio:4/3}
+.photo-item img{width:100%;height:100%;object-fit:cover}
+.photo-del{position:absolute;top:4px;right:4px;background:rgba(192,57,43,0.85);color:white;border:none;border-radius:50%;width:24px;height:24px;cursor:pointer;font-size:0.7rem;display:flex;align-items:center;justify-content:center}
+.cover-badge{position:absolute;bottom:4px;left:4px;background:var(--dg);color:white;font-size:0.6rem;padding:2px 6px;border-radius:4px}
+/* AMENITIES */
+.amen-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.amen-lbl{display:flex;align-items:center;gap:8px;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:0.82rem;font-weight:500;transition:all 0.18s}
+.amen-lbl:has(input:checked){border-color:var(--olive);background:rgba(74,103,65,0.08);color:var(--dg)}
+.amen-lbl input{display:none}
+/* PROP CARDS */
+.prop-card{background:white;border-radius:14px;overflow:hidden;box-shadow:0 2px 12px var(--shadow);display:flex;margin-bottom:1rem}
+.prop-img{width:130px;min-height:110px;flex-shrink:0;background:var(--sand);display:flex;align-items:center;justify-content:center;font-size:3rem;overflow:hidden}
+.prop-img img{width:130px;height:110px;object-fit:cover}
+.prop-body{padding:1rem;flex:1}
+.prop-body h4{font-family:'Playfair Display',serif;font-size:1rem;color:var(--dg);margin-bottom:3px}
+.prop-meta{font-size:0.78rem;color:var(--bark);margin-bottom:8px}
+/* DELETE MODAL */
+.modal-ov{position:fixed;inset:0;background:rgba(15,30,22,0.65);z-index:500;display:flex;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(3px)}
+.modal-ov.hidden{display:none}
+.modal-box{background:white;border-radius:20px;padding:2rem;width:100%;max-width:480px;position:relative}
+.modal-box h3{font-family:'Playfair Display',serif;font-size:1.4rem;color:var(--dg);margin-bottom:0.5rem}
+.modal-close{position:absolute;top:1rem;right:1rem;background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--bark)}
+/* TOAST */
+.toast{position:fixed;bottom:2rem;right:2rem;background:var(--dg);color:var(--cream);padding:14px 24px;border-radius:12px;font-size:0.9rem;z-index:9999;transform:translateX(140%);transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1);box-shadow:0 8px 30px rgba(0,0,0,0.3);max-width:360px}
+.toast.show{transform:translateX(0)}
+/* LOADING */
+.loading{display:flex;align-items:center;justify-content:center;padding:3rem;gap:12px;color:var(--bark);font-size:0.9rem}
+.spinner{width:24px;height:24px;border:3px solid var(--border);border-top-color:var(--dg);border-radius:50%;animation:spin 0.8s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+canvas{max-height:220px}
+@media(max-width:900px){.sidebar{width:220px}.main{margin-left:220px}.stats-grid{grid-template-columns:1fr 1fr}.amen-grid{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen">
+  <div class="lc">
+    <div class="l-logo">🌿 Gram<span>Vaas</span></div>
+    <div class="l-sub">Admin Panel — Secure Access</div>
+    <div class="l-err" id="lErr">❌ Incorrect password. Please try again.</div>
+    <div class="l-lock" id="lLock">🔒 Too many attempts. Wait <span id="lTimer">30</span>s</div>
+    <label class="l-lbl">Admin Password</label>
+    <div class="l-wrap">
+      <input class="l-inp" type="password" id="adminPass" placeholder="Enter admin password"
+        onkeydown="if(event.key==='Enter')doLogin()">
+      <button class="l-eye" onclick="toggleEye()" id="eyeBtn">👁</button>
+    </div>
+    <button class="l-btn" id="loginBtn" onclick="doLogin()">🔐 Login to Admin Panel</button>
+    <div class="l-info" id="lInfo"></div>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="brand">🌿 Gram<span>Vaas</span></div>
+    <div class="sub-lbl">Admin Panel</div>
+  </div>
+  <div class="nav-sec">Main</div>
+  <div class="nav-item active" id="ni-dashboard"   onclick="showTab('dashboard')"><span class="ico">📊</span> Dashboard</div>
+  <div class="nav-item" id="ni-bookings"    onclick="showTab('bookings')"><span class="ico">📅</span> Bookings</div>
+  <div class="nav-item" id="ni-properties"  onclick="showTab('properties')"><span class="ico">🏡</span> Properties</div>
+  <div class="nav-item" id="ni-guests"      onclick="showTab('guests')"><span class="ico">👥</span> Guests</div>
+  <div class="nav-item" id="ni-revenue"     onclick="showTab('revenue')"><span class="ico">💰</span> Revenue</div>
+  <div class="nav-sec">Manage</div>
+  <div class="nav-item" id="ni-add-property" onclick="showTab('add-property')"><span class="ico">➕</span> Add Property</div>
+  <div class="nav-item" id="ni-reviews"     onclick="showTab('reviews')"><span class="ico">⭐</span> Reviews</div>
+  <div class="nav-item" id="ni-coupons"     onclick="showTab('coupons')"><span class="ico">🎟</span> Coupons</div>
+  <div class="nav-item" id="ni-settings"    onclick="showTab('settings')"><span class="ico">⚙</span> Settings</div>
+  <div class="sidebar-bot">
+    <div class="ab">
+      <div class="av">SA</div>
+      <div><div class="an">Super Admin</div><div class="ar">GramVaas Owner</div></div>
+    </div>
+    <button class="logout-btn" onclick="doLogout()">🚪 Logout</button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <span class="topbar-title" id="topbarTitle">Dashboard</span>
+    <div class="topbar-right">
+      <button class="notif-btn">🔔<span class="notif-dot"></span></button>
+      <a href="index.html" target="_blank" class="view-btn">🌐 View Live Site</a>
+    </div>
+  </div>
+  <div class="content" id="mainContent">
+    <div class="loading"><div class="spinner"></div> Connecting to Firebase...</div>
+  </div>
+</div>
+
+<!-- DELETE MODAL -->
+<div class="modal-ov hidden" id="delModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeDelModal()">✕</button>
+    <h3>⚠️ Confirm Delete</h3>
+    <p style="margin:1rem 0;color:var(--bark)">Are you sure? This cannot be undone.</p>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-danger" onclick="confirmDel()" style="border-radius:8px">Yes, Delete</button>
+      <button class="btn btn-outline" onclick="closeDelModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Firebase SDK (type=module runs before regular scripts) -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, doc, getDocs, setDoc, addDoc, updateDoc, deleteDoc, query, orderBy, serverTimestamp }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getStorage, ref, uploadString, getDownloadURL }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA6lHgtS3r7Z_9PpPO9lG6LLG1Afm_ZJ20",
+  authDomain: "gramvaas.firebaseapp.com",
+  projectId: "gramvaas",
+  storageBucket: "gramvaas.firebasestorage.app",
+  messagingSenderId: "884737429558",
+  appId: "1:884737429558:web:7b002c54cf33882e4b8897"
+};
+
+const app = initializeApp(firebaseConfig);
+window.DB  = getFirestore(app);
+window.ST  = getStorage(app);
+window.FB  = { collection, doc, getDocs, setDoc, addDoc, updateDoc, deleteDoc, query, orderBy, serverTimestamp, ref, uploadString, getDownloadURL };
+window.fbReady = true;
+window.dispatchEvent(new Event('fbReady'));
+</script>
+
+<script>
+'use strict';
+
+// ============================================================
+//  INDIA DATA
+// ============================================================
+const INDIA_STATES={"Andhra Pradesh":["Visakhapatnam","Vijayawada","Guntur","Nellore","Kurnool","Tirupati","Rajahmundry","Kakinada","Amaravati"],"Arunachal Pradesh":["Itanagar","Naharlagun","Tawang","Ziro","Along"],"Assam":["Guwahati","Silchar","Dibrugarh","Jorhat","Nagaon","Tinsukia","Tezpur"],"Bihar":["Patna","Gaya","Bhagalpur","Muzaffarpur","Purnia","Darbhanga","Arrah"],"Chhattisgarh":["Raipur","Bhilai","Bilaspur","Korba","Durg","Jagdalpur"],"Goa":["Panaji","Margao","Vasco da Gama","Mapusa","Calangute","Baga","Anjuna","Arambol","Colva"],"Gujarat":["Ahmedabad","Surat","Vadodara","Rajkot","Bhavnagar","Jamnagar","Junagadh","Gandhinagar","Anand","Porbandar","Dwarka","Somnath"],"Haryana":["Faridabad","Gurugram","Rohtak","Hisar","Panipat","Ambala","Karnal","Sonipat","Panchkula"],"Himachal Pradesh":["Shimla","Manali","Dharamshala","Solan","Kullu","Mandi","Palampur","Chamba","Kangra"],"Jharkhand":["Ranchi","Jamshedpur","Dhanbad","Bokaro","Hazaribagh","Deoghar"],"Karnataka":["Bengaluru","Mysuru","Mangaluru","Hubballi","Belagavi","Coorg","Chikmagalur","Hampi","Dandeli","Udupi","Hassan","Madikeri","Sakleshpur"],"Kerala":["Thiruvananthapuram","Kochi","Kozhikode","Thrissur","Kollam","Palakkad","Alappuzha","Kannur","Kottayam","Wayanad","Idukki","Munnar","Thekkady","Varkala","Kovalam"],"Madhya Pradesh":["Bhopal","Indore","Jabalpur","Gwalior","Ujjain","Sagar","Pachmarhi","Orchha"],"Maharashtra":["Mumbai","Pune","Nagpur","Nashik","Aurangabad","Solapur","Kolhapur","Lonavala","Alibaug","Mahabaleshwar","Matheran","Ratnagiri","Sindhudurg","Palghar","Karjat","Khopoli","Igatpuri"],"Manipur":["Imphal","Thoubal","Churachandpur"],"Meghalaya":["Shillong","Tura","Cherrapunji","Mawlynnong"],"Mizoram":["Aizawl","Lunglei","Champhai"],"Nagaland":["Kohima","Dimapur","Mokokchung"],"Odisha":["Bhubaneswar","Cuttack","Rourkela","Brahmapur","Sambalpur","Puri","Balasore","Konark"],"Punjab":["Ludhiana","Amritsar","Jalandhar","Patiala","Bathinda","Mohali","Pathankot"],"Rajasthan":["Jaipur","Jodhpur","Udaipur","Kota","Bikaner","Ajmer","Alwar","Bharatpur","Chittorgarh","Bundi","Tonk","Sawai Madhopur","Pushkar","Ranthambore","Mount Abu","Jaisalmer","Barmer"],"Sikkim":["Gangtok","Namchi","Pelling","Yuksom"],"Tamil Nadu":["Chennai","Coimbatore","Madurai","Tiruchirappalli","Salem","Tirunelveli","Vellore","Ooty","Kodaikanal","Mahabalipuram","Rameswaram","Thanjavur"],"Telangana":["Hyderabad","Warangal","Nizamabad","Khammam","Karimnagar"],"Tripura":["Agartala","Dharmanagar","Udaipur"],"Uttar Pradesh":["Lucknow","Agra","Kanpur","Varanasi","Prayagraj","Meerut","Bareilly","Gorakhpur","Jhansi","Mathura","Vrindavan","Noida","Ghaziabad","Ayodhya"],"Uttarakhand":["Dehradun","Haridwar","Rishikesh","Mussoorie","Nainital","Jim Corbett","Lansdowne","Auli","Chopta","Chakrata","Munsyari","Bhimtal","Ranikhet"],"West Bengal":["Kolkata","Howrah","Durgapur","Asansol","Siliguri","Bardhaman","Malda","Darjeeling","Kalimpong"],"Delhi":["New Delhi","Dwarka","Rohini","Saket","Vasant Kunj","Mehrauli","Chattarpur"],"Jammu & Kashmir":["Srinagar","Jammu","Gulmarg","Pahalgam","Sonmarg","Poonch","Anantnag","Baramulla"],"Ladakh":["Leh","Kargil","Nubra Valley","Pangong","Zanskar"],"Chandigarh":["Chandigarh","Mohali","Panchkula"],"Puducherry":["Puducherry","Karaikal","Mahe"],"Andaman & Nicobar Islands":["Port Blair","Havelock Island","Neil Island"],"Lakshadweep":["Kavaratti","Agatti","Minicoy"],"Dadra & Nagar Haveli and Daman & Diu":["Silvassa","Daman","Diu"]};
+const PROP_TYPES=["Farmhouse","Villa","Homestay","Glamping","Treehouse","Heritage Haveli","Eco Resort","Tent Camp","Lake House","Beach Cottage","Mountain Cabin","Working Farm"];
+const AMENITIES=["Swimming Pool","WiFi","Air Conditioning","Private Chef","BBQ/Barbecue","Bonfire Area","Parking","Caretaker","Helipad","Tennis Court","Spa","Yoga Space","Jacuzzi","Gaming Room","Kids Play Area","Pet Friendly","Tractor Ride","Organic Garden","Horse Riding","Cycling","Bird Watching","Fishing Pond","Outdoor Cinema","Conference Room","EV Charging","Solar Power","Rain Shower","Home Theatre","DJ Setup","Fireplace"];
+
+// ============================================================
+//  PASSWORD & SESSION
+// ============================================================
+const ADMIN_PASSWORD = 'GramVaas@2025'; // ← Change this to your password
+const MAX_FAIL = 5;
+const LOCK_SEC = 30;
+const SESSION_MS = 8 * 3600 * 1000;
+
+let failCount = parseInt(sessionStorage.getItem('gv_f') || '0');
+let lockUntil = parseInt(sessionStorage.getItem('gv_l') || '0');
+
+function checkSession() {
+  const t = parseInt(sessionStorage.getItem('gv_t') || '0');
+  if (sessionStorage.getItem('gv_ok') === '1' && Date.now() - t < SESSION_MS) {
+    showPanel();
+  }
+  // else: login screen stays visible (default)
+}
+
+function showPanel() {
+  document.getElementById('loginScreen').classList.add('hidden');
+  waitFB(() => { seedSampleData(); showTab('dashboard'); });
+}
+
+function doLogin() {
+  if (isLocked()) return;
+  const pass = document.getElementById('adminPass').value;
+  if (!pass) { document.getElementById('adminPass').focus(); return; }
+
+  if (pass === ADMIN_PASSWORD) {
+    // SUCCESS
+    failCount = 0;
+    sessionStorage.setItem('gv_f', '0');
+    sessionStorage.removeItem('gv_l');
+    sessionStorage.setItem('gv_ok', '1');
+    sessionStorage.setItem('gv_t', Date.now().toString());
+    document.getElementById('adminPass').value = '';
+    document.getElementById('lErr').classList.remove('show');
+    document.getElementById('lInfo').textContent = '';
+    showPanel();
+  } else {
+    // WRONG
+    failCount++;
+    sessionStorage.setItem('gv_f', failCount.toString());
+    document.getElementById('lErr').classList.add('show');
+    const card = document.querySelector('.lc');
+    card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake');
+    if (failCount >= MAX_FAIL) {
+      lockUntil = Date.now() + LOCK_SEC * 1000;
+      sessionStorage.setItem('gv_l', lockUntil.toString());
+      document.getElementById('lErr').classList.remove('show');
+      startLock(LOCK_SEC);
+    } else {
+      const rem = MAX_FAIL - failCount;
+      document.getElementById('lInfo').textContent = rem + ' attempt' + (rem !== 1 ? 's' : '') + ' remaining';
+      document.getElementById('lInfo').style.color = '#C0392B';
+      document.getElementById('adminPass').value = '';
+      document.getElementById('adminPass').focus();
+    }
+  }
+}
+
+function isLocked() {
+  if (lockUntil > Date.now()) { startLock(Math.ceil((lockUntil - Date.now()) / 1000)); return true; }
+  return false;
+}
+
+function startLock(s) {
+  const lk = document.getElementById('lLock');
+  const tm = document.getElementById('lTimer');
+  const btn = document.getElementById('loginBtn');
+  const inp = document.getElementById('adminPass');
+  lk.classList.add('show'); btn.disabled = true; inp.disabled = true;
+  tm.textContent = s;
+  const iv = setInterval(() => {
+    s--;
+    tm.textContent = s;
+    if (s <= 0) {
+      clearInterval(iv);
+      lk.classList.remove('show');
+      btn.disabled = false; inp.disabled = false; inp.focus();
+      failCount = 0; sessionStorage.setItem('gv_f', '0');
+      sessionStorage.removeItem('gv_l'); lockUntil = 0;
+      document.getElementById('lInfo').textContent = '';
+    }
+  }, 1000);
+}
+
+function toggleEye() {
+  const i = document.getElementById('adminPass');
+  const b = document.getElementById('eyeBtn');
+  i.type = i.type === 'password' ? 'text' : 'password';
+  b.textContent = i.type === 'password' ? '👁' : '🙈';
+}
+
+function doLogout() {
+  if (confirm('Logout from admin panel?')) {
+    sessionStorage.clear();
+    document.getElementById('loginScreen').classList.remove('hidden');
+    document.getElementById('adminPass').value = '';
+    document.getElementById('lErr').classList.remove('show');
+    showToast('👋 Logged out');
+  }
+}
+
+// ============================================================
+//  FIREBASE HELPERS
+// ============================================================
+function waitFB(cb) {
+  if (window.fbReady) cb();
+  else window.addEventListener('fbReady', cb, { once: true });
+}
+
+async function dbGetAll(colName) {
+  try {
+    const { collection, getDocs, query, orderBy } = window.FB;
+    const snap = await getDocs(query(collection(window.DB, colName), orderBy('createdAt', 'desc')));
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch (e) {
+    console.warn('Firebase read error:', e);
+    return [];
+  }
+}
+
+async function dbSet(colName, id, data) {
+  try {
+    const { doc, setDoc, serverTimestamp } = window.FB;
+    await setDoc(doc(window.DB, colName, id), { ...data, updatedAt: serverTimestamp() });
+    return true;
+  } catch (e) { console.warn('Firebase write error:', e); return false; }
+}
+
+async function dbUpdate(colName, id, data) {
+  try {
+    const { doc, updateDoc } = window.FB;
+    await updateDoc(doc(window.DB, colName, id), data);
+    return true;
+  } catch (e) { console.warn('Firebase update error:', e); return false; }
+}
+
+async function dbDelete(colName, id) {
+  try {
+    const { doc, deleteDoc } = window.FB;
+    await deleteDoc(doc(window.DB, colName, id));
+    return true;
+  } catch (e) { console.warn('Firebase delete error:', e); return false; }
+}
+
+async function dbAddBooking(bk) {
+  try {
+    const { collection, addDoc, serverTimestamp } = window.FB;
+    await addDoc(collection(window.DB, 'bookings'), { ...bk, createdAt: serverTimestamp() });
+    return true;
+  } catch (e) { return false; }
+}
+
+async function uploadPhoto(base64, propId, idx) {
+  try {
+    const { ref, uploadString, getDownloadURL } = window.FB;
+    const r = ref(window.ST, `properties/${propId}/p_${idx}_${Date.now()}.jpg`);
+    const snap = await uploadString(r, base64, 'data_url');
+    return await getDownloadURL(snap.ref);
+  } catch (e) { return base64; } // fallback: keep base64
+}
+
+// ============================================================
+//  SEED SAMPLE DATA
+// ============================================================
+async function seedSampleData() {
+  const props = await dbGetAll('properties');
+  if (props.length > 0) return;
+  const defaults = [
+    { id: 'P1', name: 'Aravallis Heritage Farm', state: 'Rajasthan', city: 'Jaipur', type: 'Heritage Haveli', price: 8500, guests: 12, rooms: 5, baths: 4, rating: 4.9, reviews: 128, badge: 'Premium', amenities: ['Swimming Pool', 'Air Conditioning', 'Private Chef', 'Parking', 'Bonfire Area'], desc: 'A stunning heritage farmhouse in the Aravalli foothills. Traditional Rajputana architecture, sparkling pool, lush gardens.', photos: [], emoji: '🏯', active: true, createdAt: Date.now() - 1000000 },
+    { id: 'P2', name: 'Konkan Sea Breeze Villa', state: 'Maharashtra', city: 'Alibaug', type: 'Villa', price: 14000, guests: 18, rooms: 7, baths: 6, rating: 4.8, reviews: 89, badge: 'New', amenities: ['Swimming Pool', 'BBQ/Barbecue', 'Bonfire Area', 'WiFi', 'Air Conditioning'], desc: 'Wake up to the sound of waves at this stunning Konkan villa just 200 metres from the beach.', photos: [], emoji: '🌊', active: true, createdAt: Date.now() - 900000 },
+    { id: 'P3', name: 'Coorg Coffee Estate Stay', state: 'Karnataka', city: 'Madikeri', type: 'Homestay', price: 6500, guests: 8, rooms: 4, baths: 3, rating: 4.7, reviews: 203, badge: 'Bestseller', amenities: ['Organic Garden', 'Bird Watching', 'WiFi', 'Bonfire Area'], desc: 'Immerse yourself in the misty coffee plantations of Coorg with guided tours and authentic cuisine.', photos: [], emoji: '☕', active: true, createdAt: Date.now() - 800000 },
+    { id: 'P4', name: 'Goa Jungle Beach Farm', state: 'Goa', city: 'Panaji', type: 'Eco Resort', price: 9800, guests: 10, rooms: 4, baths: 4, rating: 4.6, reviews: 156, badge: '', amenities: ['Organic Garden', 'Yoga Space', 'Swimming Pool', 'Bonfire Area'], desc: 'Hidden gem at the southern tip of Goa. Eco-friendly farmhouse with daily yoga.', photos: [], emoji: '🌴', active: true, createdAt: Date.now() - 700000 },
+    { id: 'P5', name: 'Manali Alpine Farmhouse', state: 'Himachal Pradesh', city: 'Manali', type: 'Mountain Cabin', price: 5500, guests: 6, rooms: 3, baths: 2, rating: 4.8, reviews: 95, badge: 'Popular', amenities: ['Fireplace', 'Bonfire Area', 'WiFi', 'Cycling'], desc: 'Perched at 2,000 metres in Old Manali with breathtaking Himalayan panorama.', photos: [], emoji: '🏔', active: true, createdAt: Date.now() - 600000 },
+    { id: 'P6', name: 'Nashik Vineyard Estate', state: 'Maharashtra', city: 'Nashik', type: 'Villa', price: 11000, guests: 14, rooms: 6, baths: 5, rating: 4.9, reviews: 74, badge: 'Premium', amenities: ['Swimming Pool', 'Spa', 'Private Chef', 'Tennis Court', 'Jacuzzi'], desc: "Maharashtra's wine country. Private wine tasting, vineyard walks, spa treatments.", photos: [], emoji: '🍇', active: true, createdAt: Date.now() - 500000 },
+  ];
+  for (const p of defaults) await dbSet('properties', p.id, p);
+  showToast('✅ Sample data loaded to Firebase!');
+}
+
+// ============================================================
+//  STATE
+// ============================================================
+let currentTab = 'dashboard';
+let delId = null;
+let editId = null;
+let uploadedPhotos = [];
+let charts = {};
+
+// ============================================================
+//  TAB NAVIGATION
+// ============================================================
+function showTab(tab) {
+  currentTab = tab;
+  // Update sidebar active state
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const ni = document.getElementById('ni-' + tab);
+  if (ni) ni.classList.add('active');
+  // Update topbar title
+  const titles = { dashboard: 'Dashboard', bookings: 'Bookings', properties: 'Properties', guests: 'Guests', revenue: 'Revenue Analytics', 'add-property': 'Add New Property', reviews: 'Reviews', coupons: 'Coupons & Offers', settings: 'Settings' };
+  document.getElementById('topbarTitle').textContent = titles[tab] || tab;
+  // Destroy old charts
+  Object.values(charts).forEach(c => { try { c.destroy(); } catch (e) {} });
+  charts = {};
+  // Show loading
+  const el = document.getElementById('mainContent');
+  el.innerHTML = '<div class="loading"><div class="spinner"></div> Loading...</div>';
+  // Render tab
+  switch (tab) {
+    case 'dashboard':    renderDashboard(el); break;
+    case 'bookings':     renderBookings(el); break;
+    case 'properties':   renderProperties(el); break;
+    case 'guests':       renderGuests(el); break;
+    case 'revenue':      renderRevenue(el); break;
+    case 'add-property': renderAddProperty(el, null); break;
+    case 'reviews':      renderReviews(el); break;
+    case 'coupons':      renderCoupons(el); break;
+    case 'settings':     renderSettings(el); break;
+  }
+}
+
+// ============================================================
+//  DASHBOARD
+// ============================================================
+async function renderDashboard(el) {
+  const [props, bookings] = await Promise.all([dbGetAll('properties'), dbGetAll('bookings')]);
+  const revenue = bookings.filter(b => b.status === 'confirmed' || b.status === 'completed').reduce((s, b) => s + (b.amount || 0), 0);
+  el.innerHTML = `
+  <div class="stats-grid">
+    <div class="stat-card"><div class="s-lbl">Total Revenue</div><div class="s-val">₹${(revenue / 100000).toFixed(1)}L</div><div class="s-chg up">↑ Live from Firebase</div></div>
+    <div class="stat-card terra"><div class="s-lbl">Active Bookings</div><div class="s-val">${bookings.filter(b => b.status === 'confirmed').length}</div><div class="s-chg up">↑ Real-time</div></div>
+    <div class="stat-card gold"><div class="s-lbl">Properties</div><div class="s-val">${props.length}</div><div class="s-chg up">↑ All devices synced</div></div>
+    <div class="stat-card olive"><div class="s-lbl">Total Guests</div><div class="s-val">${bookings.reduce((s, b) => s + (b.guests || 0), 0)}</div><div class="s-chg up">↑ Live</div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:2fr 1fr;gap:1.5rem;margin-bottom:1.5rem">
+    <div class="card"><div class="card-title">Revenue Trend</div><canvas id="cRev"></canvas></div>
+    <div class="card">
+      <div class="card-title">Quick Actions</div>
+      <div style="display:grid;gap:10px">
+        <button class="btn btn-primary" onclick="showTab('add-property')" style="justify-content:center">➕ Add Property</button>
+        <button class="btn btn-outline" onclick="showTab('bookings')" style="border-color:var(--olive);color:var(--olive);justify-content:center">📅 All Bookings</button>
+        <button class="btn btn-outline" onclick="showTab('properties')" style="border-color:var(--olive);color:var(--olive);justify-content:center">🏡 Manage Properties</button>
+        <button class="btn btn-outline" onclick="showTab('coupons')" style="border-color:var(--olive);color:var(--olive);justify-content:center">🎟 Create Coupon</button>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Recent Bookings (Firebase Live)</div>
+    <div style="overflow-x:auto"><table>
+      <thead><tr><th>ID</th><th>Guest</th><th>Property</th><th>Check-in</th><th>Amount</th><th>Status</th></tr></thead>
+      <tbody>${bookings.slice(0, 5).map(b => `<tr>
+        <td style="font-weight:600;color:var(--terra);font-size:0.78rem">${(b.id || '').slice(-8)}</td>
+        <td>${b.guestName || '—'}</td>
+        <td style="font-size:0.82rem;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.propName || '—'}</td>
+        <td style="font-size:0.82rem">${b.checkin || '—'}</td>
+        <td style="font-weight:600">₹${(b.amount || 0).toLocaleString('en-IN')}</td>
+        <td><span class="bdg ${sbadge(b.status)}">${b.status || '—'}</span></td>
+      </tr>`).join('') || '<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--bark)">No bookings yet</td></tr>'}
+      </tbody>
+    </table></div>
+  </div>`;
+  setTimeout(() => {
+    const c = document.getElementById('cRev');
+    if (c) charts.r = new Chart(c, { type: 'bar', data: { labels: ['Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Now'], datasets: [{ label: '₹L', data: [7.2, 8.5, 9.1, 10.8, 11.2, parseFloat((revenue / 100000).toFixed(1)) || 12.4], backgroundColor: 'rgba(28,58,42,0.8)', borderRadius: 6, borderSkipped: false }] }, options: { responsive: true, plugins: { legend: { display: false } } } });
+  }, 100);
+}
+
+// ============================================================
+//  BOOKINGS
+// ============================================================
+let _bks = [];
+async function renderBookings(el) {
+  _bks = await dbGetAll('bookings');
+  el.innerHTML = `
+  <div class="search-bar">
+    <input type="text" placeholder="🔍 Search guest, property..." id="bkQ" oninput="filterBk()">
+    <select id="bkSt" onchange="filterBk()"><option value="">All Status</option><option value="confirmed">Confirmed</option><option value="pending">Pending</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option></select>
+    <button class="btn btn-outline btn-sm" onclick="exportBkCSV()">📥 Export CSV</button>
+    <span style="font-size:0.82rem;color:var(--bark)" id="bkCnt">${_bks.length} bookings</span>
+  </div>
+  <div class="card" style="padding:0"><div style="overflow-x:auto"><table>
+    <thead><tr><th>ID</th><th>Guest</th><th>Phone</th><th>Property</th><th>Check-in</th><th>Check-out</th><th>Guests</th><th>Amount</th><th>Payment</th><th>Status</th><th>Action</th></tr></thead>
+    <tbody id="bkBody">${bkRows(_bks)}</tbody>
+  </table></div></div>`;
+}
+function bkRows(bks) {
+  if (!bks.length) return '<tr><td colspan="11" style="text-align:center;padding:2rem;color:var(--bark)">No bookings yet</td></tr>';
+  return bks.map(b => `<tr>
+    <td style="font-weight:600;color:var(--terra);white-space:nowrap;font-size:0.78rem">${(b.id || '').slice(-8)}</td>
+    <td style="white-space:nowrap">${b.guestName || '—'}</td>
+    <td style="font-size:0.8rem">${b.guestPhone || '—'}</td>
+    <td style="font-size:0.8rem;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.propName || '—'}</td>
+    <td style="white-space:nowrap;font-size:0.82rem">${b.checkin || '—'}</td>
+    <td style="white-space:nowrap;font-size:0.82rem">${b.checkout || '—'}</td>
+    <td style="text-align:center">${b.guests || 1}</td>
+    <td style="font-weight:600;white-space:nowrap">₹${(b.amount || 0).toLocaleString('en-IN')}</td>
+    <td style="font-size:0.82rem">${b.payment || '—'}</td>
+    <td><span class="bdg ${sbadge(b.status)}">${b.status || '—'}</span></td>
+    <td><button class="btn btn-sm btn-outline" onclick="cycleStatus('${b.id}')">Update</button></td>
+  </tr>`).join('');
+}
+function filterBk() {
+  const q = (document.getElementById('bkQ').value || '').toLowerCase();
+  const s = document.getElementById('bkSt').value;
+  const f = _bks.filter(b => (!q || (b.guestName || '').toLowerCase().includes(q) || (b.propName || '').toLowerCase().includes(q) || (b.id || '').includes(q)) && (!s || b.status === s));
+  document.getElementById('bkBody').innerHTML = bkRows(f);
+  document.getElementById('bkCnt').textContent = f.length + ' bookings';
+}
+async function cycleStatus(id) {
+  const b = _bks.find(x => x.id === id); if (!b) return;
+  const cycle = ['pending', 'confirmed', 'completed', 'cancelled'];
+  const next = cycle[(cycle.indexOf(b.status) + 1) % cycle.length];
+  await dbUpdate('bookings', id, { status: next });
+  showToast('✅ Status → ' + next);
+  renderBookings(document.getElementById('mainContent'));
+}
+function exportBkCSV() {
+  const rows = _bks.map(b => [b.id, b.guestName, b.guestEmail, b.guestPhone, '"' + (b.propName || '') + '"', b.checkin, b.checkout, b.guests, b.amount, b.status, b.payment].join(','));
+  const blob = new Blob(['ID,Guest,Email,Phone,Property,Checkin,Checkout,Guests,Amount,Status,Payment\n' + rows.join('\n')], { type: 'text/csv' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'bookings.csv'; a.click();
+  showToast('📥 Exported!');
+}
+
+// ============================================================
+//  PROPERTIES
+// ============================================================
+let _props = [];
+async function renderProperties(el) {
+  _props = await dbGetAll('properties');
+  el.innerHTML = `
+  <div class="search-bar">
+    <input type="text" placeholder="🔍 Search name, city, state..." id="prQ" oninput="filterProps()">
+    <select id="prSt" onchange="filterProps()">${'<option value="">All States</option>' + Object.keys(INDIA_STATES).map(s => `<option>${s}</option>`).join('')}</select>
+    <select id="prTp" onchange="filterProps()">${'<option value="">All Types</option>' + PROP_TYPES.map(t => `<option>${t}</option>`).join('')}</select>
+    <button class="btn btn-primary" onclick="showTab('add-property')">➕ Add Property</button>
+  </div>
+  <div style="font-size:0.85rem;color:var(--bark);margin-bottom:1rem" id="prCnt">${_props.length} properties (Firebase)</div>
+  <div id="prList">${propCards(_props)}</div>`;
+}
+function propCards(props) {
+  if (!props.length) return `<div style="text-align:center;padding:3rem;color:var(--bark)">No properties yet. <span onclick="showTab('add-property')" style="color:var(--terra);cursor:pointer">Add one →</span></div>`;
+  return props.map(p => `
+  <div class="prop-card">
+    <div class="prop-img">${p.photos && p.photos.length ? `<img src="${p.photos[0]}" alt="${p.name}">` : `<span>${p.emoji || '🏡'}</span>`}</div>
+    <div class="prop-body">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div style="flex:1">
+          <h4>${p.name}</h4>
+          <div class="prop-meta">📍 ${p.city}, ${p.state} | ${p.type} | 👥 ${p.guests} guests | ⭐ ${p.rating || 4.5}</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px">
+            ${p.badge ? `<span class="bdg b-warn">${p.badge}</span>` : ''}
+            <span class="bdg ${p.active ? 'b-ok' : 'b-err'}">${p.active ? 'Active' : 'Inactive'}</span>
+            <span class="bdg b-gray">${(p.photos || []).length} photos</span>
+          </div>
+          <div style="font-size:0.78rem;color:var(--bark)">${(p.amenities || []).slice(0, 4).join(', ')}${p.amenities && p.amenities.length > 4 ? ' +more' : ''}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0;margin-left:1rem">
+          <div style="font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--dg)">₹${Number(p.price).toLocaleString('en-IN')}</div>
+          <div style="font-size:0.75rem;color:var(--bark)">/night</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+        <button class="btn btn-sm btn-green" onclick="editProp('${p.id}')">✏ Edit</button>
+        <button class="btn btn-sm btn-outline" onclick="toggleActive('${p.id}',${!!p.active})">${p.active ? 'Deactivate' : 'Activate'}</button>
+        <button class="btn btn-sm btn-danger" onclick="askDel('${p.id}')">🗑 Delete</button>
+      </div>
+    </div>
+  </div>`).join('');
+}
+function filterProps() {
+  const q = (document.getElementById('prQ').value || '').toLowerCase();
+  const s = document.getElementById('prSt').value;
+  const t = document.getElementById('prTp').value;
+  const f = _props.filter(p => (!q || (p.name || '').toLowerCase().includes(q) || (p.city || '').toLowerCase().includes(q) || (p.state || '').toLowerCase().includes(q)) && (!s || p.state === s) && (!t || p.type === t));
+  document.getElementById('prList').innerHTML = propCards(f);
+  document.getElementById('prCnt').textContent = f.length + ' properties';
+}
+async function toggleActive(id, cur) {
+  await dbUpdate('properties', id, { active: !cur });
+  showToast(cur ? '⏸ Deactivated' : '✅ Activated');
+  renderProperties(document.getElementById('mainContent'));
+}
+function askDel(id) { delId = id; document.getElementById('delModal').classList.remove('hidden'); }
+function closeDelModal() { document.getElementById('delModal').classList.add('hidden'); delId = null; }
+async function confirmDel() {
+  if (!delId) return;
+  await dbDelete('properties', delId);
+  closeDelModal();
+  showToast('🗑 Deleted from Firebase');
+  renderProperties(document.getElementById('mainContent'));
+}
+function editProp(id) {
+  const p = _props.find(x => x.id === id); if (!p) return;
+  editId = id;
+  uploadedPhotos = (p.photos || []).map(u => ({ url: u, isNew: false }));
+  renderAddProperty(document.getElementById('mainContent'), p);
+}
+
+// ============================================================
+//  ADD / EDIT PROPERTY
+// ============================================================
+function renderAddProperty(el, p) {
+  const isEdit = !!p;
+  if (!isEdit) { editId = null; uploadedPhotos = []; }
+  const stOpts = Object.keys(INDIA_STATES).map(s => `<option value="${s}" ${p && p.state === s ? 'selected' : ''}>${s}</option>`).join('');
+  const ctOpts = p && INDIA_STATES[p.state] ? INDIA_STATES[p.state].map(c => `<option ${p.city === c ? 'selected' : ''}>${c}</option>`).join('') : '';
+  const tpOpts = PROP_TYPES.map(t => `<option ${p && p.type === t ? 'selected' : ''}>${t}</option>`).join('');
+  const bdOpts = ['', 'New', 'Popular', 'Bestseller', 'Premium', 'Featured'].map(b => `<option value="${b}" ${p && p.badge === b ? 'selected' : ''}>${b || 'None'}</option>`).join('');
+
+  el.innerHTML = `
+  <div style="max-width:860px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
+      <h2 style="font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--dg)">${isEdit ? '✏ Edit Property' : '➕ Add New Property'}</h2>
+      ${isEdit ? `<button class="btn btn-outline" onclick="showTab('properties')">← Back</button>` : ''}
+    </div>
+
+    <div class="card">
+      <div class="card-title">📸 Property Photos <small style="font-weight:400;color:var(--bark)">(Uploaded to Firebase Storage)</small></div>
+      <div class="photo-zone" onclick="document.getElementById('photoInp').click()">
+        <div style="font-size:2.5rem;margin-bottom:0.5rem">📷</div>
+        <div style="font-weight:600;color:var(--dg);margin-bottom:4px">Click to upload photos</div>
+        <div style="font-size:0.82rem;color:var(--bark)">JPG, PNG — max 5MB each. First photo = cover image.</div>
+        <input type="file" id="photoInp" accept="image/*" multiple onchange="handlePhotos(event)">
+      </div>
+      <div class="photo-grid" id="photoGrid">${renderPhotos()}</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📋 Basic Information</div>
+      <div class="fg"><label>Property Name *</label><input type="text" id="fName" placeholder="e.g. Sunset Vineyard Estate" value="${p ? p.name : ''}"></div>
+      <div class="fgrid">
+        <div class="fg"><label>Property Type *</label><select id="fType">${tpOpts}</select></div>
+        <div class="fg"><label>Badge</label><select id="fBadge">${bdOpts}</select></div>
+      </div>
+      <div class="fgrid">
+        <div class="fg"><label>State *</label><select id="fState" onchange="updateCities()"><option value="">Select State</option>${stOpts}</select></div>
+        <div class="fg"><label>City *</label><select id="fCity"><option value="">Select City</option>${ctOpts}</select></div>
+      </div>
+      <div class="fg"><label>Full Address</label><input type="text" id="fAddr" placeholder="Village, Road, Landmark, PIN" value="${p ? p.address || '' : ''}"></div>
+      <div class="fg"><label>Description *</label><textarea id="fDesc" placeholder="Describe the property...">${p ? p.desc : ''}</textarea></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">💰 Capacity &amp; Pricing</div>
+      <div class="fgrid3">
+        <div class="fg"><label>Max Guests *</label><input type="number" id="fGuests" min="1" placeholder="12" value="${p ? p.guests : ''}"></div>
+        <div class="fg"><label>Bedrooms</label><input type="number" id="fRooms" min="1" placeholder="4" value="${p ? p.rooms : ''}"></div>
+        <div class="fg"><label>Bathrooms</label><input type="number" id="fBaths" min="1" placeholder="3" value="${p ? p.baths : ''}"></div>
+      </div>
+      <div class="fgrid">
+        <div class="fg"><label>Price / Night (₹) *</label><input type="number" id="fPrice" min="0" placeholder="8500" value="${p ? p.price : ''}"></div>
+        <div class="fg"><label>Security Deposit (₹)</label><input type="number" id="fDeposit" min="0" placeholder="5000" value="${p ? p.deposit || '' : ''}"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">✅ Amenities</div>
+      <div class="amen-grid">${AMENITIES.map(a => `<label class="amen-lbl"><input type="checkbox" value="${a}" ${p && (p.amenities || []).includes(a) ? 'checked' : ''}> ${a}</label>`).join('')}</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">👤 Host Information</div>
+      <div class="fgrid">
+        <div class="fg"><label>Host Name</label><input type="text" id="fHostName" placeholder="Full name" value="${p ? p.hostName || '' : ''}"></div>
+        <div class="fg"><label>Host Mobile</label><input type="tel" id="fHostPhone" placeholder="+91 9876543210" value="${p ? p.hostPhone || '' : ''}"></div>
+      </div>
+      <div class="fgrid">
+        <div class="fg"><label>PAN Number</label><input type="text" id="fPan" placeholder="ABCDE1234F" value="${p ? p.pan || '' : ''}"></div>
+        <div class="fg"><label>GST Number</label><input type="text" id="fGst" placeholder="27AABCG1234A1Z1" value="${p ? p.gst || '' : ''}"></div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:2rem">
+      <button class="btn btn-primary" onclick="saveProp(false)">${isEdit ? '💾 Update Property' : '✅ Publish to Firebase'}</button>
+      <button class="btn btn-outline" onclick="saveProp(true)">📄 Save as Draft</button>
+      ${isEdit ? `<button class="btn btn-danger" onclick="askDel('${p.id}')" style="border-radius:50px">🗑 Delete</button>` : ''}
+    </div>
+    <div id="saveStatus" style="font-size:0.88rem;color:var(--olive)"></div>
+  </div>`;
+}
+
+function updateCities(sel = '') {
+  const s = (document.getElementById('fState') || {}).value || '';
+  const el = document.getElementById('fCity'); if (!el) return;
+  el.innerHTML = `<option value="">Select City</option>` + (INDIA_STATES[s] || []).map(c => `<option ${c === sel ? 'selected' : ''}>${c}</option>`).join('');
+}
+
+function handlePhotos(e) {
+  Array.from(e.target.files).slice(0, 10 - uploadedPhotos.length).forEach(f => {
+    if (f.size > 5 * 1024 * 1024) { showToast(`⚠ ${f.name} over 5MB`); return; }
+    const r = new FileReader();
+    r.onload = ev => {
+      uploadedPhotos.push({ url: ev.target.result, isNew: true });
+      const g = document.getElementById('photoGrid'); if (g) g.innerHTML = renderPhotos();
+    };
+    r.readAsDataURL(f);
+  });
+}
+
+function renderPhotos() {
+  if (!uploadedPhotos.length) return '<p style="color:var(--bark);font-size:0.82rem;padding:0.5rem;grid-column:1/-1">No photos yet</p>';
+  return uploadedPhotos.map((ph, i) => `
+  <div class="photo-item">
+    <img src="${ph.url || ph}" alt="photo">
+    <button class="photo-del" onclick="removePhoto(${i})">✕</button>
+    ${i === 0 ? '<div class="cover-badge">Cover</div>' : ''}
+  </div>`).join('');
+}
+
+function removePhoto(i) {
+  uploadedPhotos.splice(i, 1);
+  const g = document.getElementById('photoGrid'); if (g) g.innerHTML = renderPhotos();
+}
+
+async function saveProp(isDraft) {
+  const name = (document.getElementById('fName') || {}).value?.trim();
+  const state = (document.getElementById('fState') || {}).value;
+  const city = (document.getElementById('fCity') || {}).value;
+  const price = parseFloat((document.getElementById('fPrice') || {}).value) || 0;
+  const guests = parseInt((document.getElementById('fGuests') || {}).value) || 0;
+  if (!name || !state || !city || !price || !guests) { showToast('⚠ Fill: Name, State, City, Price, Guests'); return; }
+
+  const st = document.getElementById('saveStatus');
+  if (st) st.textContent = '⬆ Saving to Firebase...';
+
+  const propId = editId || ('P' + Date.now());
+
+  // Upload new photos to Firebase Storage
+  const finalPhotos = [];
+  for (let i = 0; i < uploadedPhotos.length; i++) {
+    const ph = uploadedPhotos[i];
+    if (ph.isNew) {
+      const url = await uploadPhoto(ph.url, propId, i);
+      finalPhotos.push(url);
+    } else {
+      finalPhotos.push(ph.url || ph);
+    }
+  }
+
+  const amenities = Array.from(document.querySelectorAll('.amen-lbl input:checked')).map(c => c.value);
+  const data = {
+    id: propId, name, state, city,
+    type: (document.getElementById('fType') || {}).value || 'Farmhouse',
+    badge: (document.getElementById('fBadge') || {}).value || '',
+    address: (document.getElementById('fAddr') || {}).value || '',
+    desc: (document.getElementById('fDesc') || {}).value || '',
+    guests, rooms: parseInt((document.getElementById('fRooms') || {}).value) || 1,
+    baths: parseInt((document.getElementById('fBaths') || {}).value) || 1,
+    price, deposit: parseFloat((document.getElementById('fDeposit') || {}).value) || 0,
+    amenities, photos: finalPhotos,
+    hostName: (document.getElementById('fHostName') || {}).value || '',
+    hostPhone: (document.getElementById('fHostPhone') || {}).value || '',
+    pan: ((document.getElementById('fPan') || {}).value || '').toUpperCase(),
+    gst: ((document.getElementById('fGst') || {}).value || '').toUpperCase(),
+    emoji: getEmoji((document.getElementById('fType') || {}).value),
+    rating: editId ? ((_props.find(x => x.id === editId) || {}).rating || 4.5) : 4.5,
+    reviews: editId ? ((_props.find(x => x.id === editId) || {}).reviews || 0) : 0,
+    active: !isDraft, draft: !!isDraft,
+    createdAt: editId ? ((_props.find(x => x.id === editId) || {}).createdAt || Date.now()) : Date.now(),
+  };
+
+  const ok = await dbSet('properties', propId, data);
+  editId = null; uploadedPhotos = [];
+  if (ok) {
+    showToast(isDraft ? '📄 Draft saved!' : '🎉 Published! Visible on all devices now.');
+    showTab('properties');
+  } else {
+    showToast('❌ Save failed. Check Firebase connection.');
+    if (st) st.textContent = '❌ Save failed.';
+  }
+}
+
+function getEmoji(t) {
+  const m = { 'Farmhouse': '🏡', 'Villa': '🏰', 'Homestay': '🏠', 'Glamping': '⛺', 'Treehouse': '🌲', 'Heritage Haveli': '🏯', 'Eco Resort': '🌿', 'Tent Camp': '⛺', 'Lake House': '🏞', 'Beach Cottage': '🏖', 'Mountain Cabin': '🏔', 'Working Farm': '🌾' };
+  return m[t] || '🏡';
+}
+
+// ============================================================
+//  GUESTS
+// ============================================================
+let _guests = [];
+async function renderGuests(el) {
+  const bks = await dbGetAll('bookings');
+  const gMap = {};
+  bks.forEach(b => {
+    const k = b.guestEmail || b.guestPhone || b.guestName || 'unknown';
+    if (!gMap[k]) gMap[k] = { name: b.guestName, email: b.guestEmail, phone: b.guestPhone, bookings: 0, spent: 0 };
+    gMap[k].bookings++;
+    if (b.status !== 'cancelled') gMap[k].spent += (b.amount || 0);
+  });
+  _guests = Object.values(gMap);
+  el.innerHTML = `
+  <div class="search-bar">
+    <input type="text" placeholder="🔍 Search guests..." id="gQ" oninput="filterGuests()">
+    <span style="font-size:0.82rem;color:var(--bark)" id="gCnt">${_guests.length} guests</span>
+  </div>
+  <div class="card" style="padding:0"><div style="overflow-x:auto"><table>
+    <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Bookings</th><th>Total Spent</th><th>Avg/Booking</th></tr></thead>
+    <tbody id="gBody">${guestRows(_guests)}</tbody>
+  </table></div></div>`;
+}
+function guestRows(g) {
+  if (!g.length) return '<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--bark)">No guests yet</td></tr>';
+  return g.map(x => `<tr>
+    <td style="font-weight:500">${x.name || '—'}</td>
+    <td style="font-size:0.82rem">${x.email || '—'}</td>
+    <td style="font-size:0.82rem">${x.phone || '—'}</td>
+    <td style="text-align:center">${x.bookings}</td>
+    <td style="font-weight:600">₹${x.spent.toLocaleString('en-IN')}</td>
+    <td style="font-size:0.82rem">₹${x.bookings ? Math.round(x.spent / x.bookings).toLocaleString('en-IN') : '0'}</td>
+  </tr>`).join('');
+}
+function filterGuests() {
+  const q = (document.getElementById('gQ').value || '').toLowerCase();
+  const f = _guests.filter(g => !q || (g.name || '').toLowerCase().includes(q) || (g.email || '').toLowerCase().includes(q));
+  document.getElementById('gBody').innerHTML = guestRows(f);
+  document.getElementById('gCnt').textContent = f.length + ' guests';
+}
+
+// ============================================================
+//  REVENUE
+// ============================================================
+async function renderRevenue(el) {
+  const [props, bks] = await Promise.all([dbGetAll('properties'), dbGetAll('bookings')]);
+  const total = bks.filter(b => b.status === 'confirmed' || b.status === 'completed').reduce((s, b) => s + (b.amount || 0), 0);
+  const comm = Math.round(total * 0.15), gst = Math.round(total * 0.18);
+  el.innerHTML = `
+  <div class="stats-grid">
+    <div class="stat-card"><div class="s-lbl">Gross Revenue</div><div class="s-val">₹${(total / 100000).toFixed(1)}L</div></div>
+    <div class="stat-card terra"><div class="s-lbl">Commission (15%)</div><div class="s-val">₹${(comm / 100000).toFixed(1)}L</div></div>
+    <div class="stat-card gold"><div class="s-lbl">Host Payouts</div><div class="s-val">₹${((total - comm) / 100000).toFixed(1)}L</div></div>
+    <div class="stat-card olive"><div class="s-lbl">GST Collected</div><div class="s-val">₹${(gst / 100000).toFixed(1)}L</div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:2fr 1fr;gap:1.5rem;margin-bottom:1.5rem">
+    <div class="card"><div class="card-title">Revenue Trend</div><canvas id="cTrend"></canvas></div>
+    <div class="card"><div class="card-title">Payment Methods</div><canvas id="cPay"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Property Revenue (Firebase)</div>
+    <div style="overflow-x:auto"><table>
+      <thead><tr><th>Property</th><th>State</th><th>Bookings</th><th>Revenue</th><th>Commission</th><th>Payout</th></tr></thead>
+      <tbody>${props.map(p => {
+        const pb = bks.filter(b => b.propId === p.id && b.status !== 'cancelled');
+        const rev = pb.reduce((s, b) => s + (b.amount || 0), 0);
+        return `<tr><td style="font-weight:500">${p.name}</td><td style="font-size:0.82rem">${p.state}</td><td>${pb.length}</td><td style="font-weight:600">₹${rev.toLocaleString('en-IN')}</td><td style="color:var(--terra)">₹${Math.round(rev * 0.15).toLocaleString('en-IN')}</td><td style="color:#2D9E6A;font-weight:600">₹${Math.round(rev * 0.85).toLocaleString('en-IN')}</td></tr>`;
+      }).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--bark);padding:1.5rem">No data yet</td></tr>'}
+      </tbody>
+    </table></div>
+  </div>`;
+  setTimeout(() => {
+    const pm = { UPI: 0, Card: 0, 'Net Banking': 0, EMI: 0, Online: 0 };
+    bks.forEach(b => { const k = b.payment || 'Online'; if (pm[k] !== undefined) pm[k]++; else pm['Online']++; });
+    const c1 = document.getElementById('cTrend');
+    if (c1) charts.t = new Chart(c1, { type: 'line', data: { labels: ['Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Now'], datasets: [{ label: '₹L', data: [7.2, 8.5, 9.1, 10.8, 11.2, parseFloat((total / 100000).toFixed(1)) || 12.4], borderColor: '#1C3A2A', tension: 0.4, fill: true, backgroundColor: 'rgba(28,58,42,0.08)' }] }, options: { responsive: true, plugins: { legend: { display: false } } } });
+    const c2 = document.getElementById('cPay');
+    if (c2) charts.p = new Chart(c2, { type: 'doughnut', data: { labels: Object.keys(pm), datasets: [{ data: Object.values(pm), backgroundColor: ['#1C3A2A', '#C2623F', '#D4A843', '#4A6741', '#8BA888'] }] }, options: { responsive: true, plugins: { legend: { position: 'bottom' } } } });
+  }, 100);
+}
+
+// ============================================================
+//  REVIEWS
+// ============================================================
+async function renderReviews(el) {
+  const bks = (await dbGetAll('bookings')).filter(b => b.status === 'completed');
+  el.innerHTML = `
+  <div class="card">
+    <div class="card-title">Completed Stays (eligible for review)</div>
+    <div style="overflow-x:auto"><table>
+      <thead><tr><th>Guest</th><th>Property</th><th>Check-in</th><th>Amount</th><th>Status</th></tr></thead>
+      <tbody>${bks.length ? bks.map(b => `<tr>
+        <td style="font-weight:500">${b.guestName || '—'}</td>
+        <td style="font-size:0.82rem">${b.propName || '—'}</td>
+        <td style="font-size:0.82rem">${b.checkin || '—'} → ${b.checkout || '—'}</td>
+        <td style="font-weight:600">₹${(b.amount || 0).toLocaleString('en-IN')}</td>
+        <td><span class="bdg b-info">Completed</span></td>
+      </tr>`).join('') : '<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--bark)">No completed stays yet</td></tr>'}
+      </tbody>
+    </table></div>
+  </div>`;
+}
+
+// ============================================================
+//  COUPONS
+// ============================================================
+function renderCoupons(el) {
+  el.innerHTML = `
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
+    <div class="card">
+      <div class="card-title">Create Coupon</div>
+      <div class="fg"><label>Coupon Code *</label><input type="text" id="cCode" placeholder="e.g. HOLI25" style="text-transform:uppercase"></div>
+      <div class="fgrid">
+        <div class="fg"><label>Type</label><select id="cType"><option value="percent">Percentage (%)</option><option value="fixed">Fixed (₹)</option></select></div>
+        <div class="fg"><label>Value *</label><input type="number" id="cVal" placeholder="25"></div>
+      </div>
+      <div class="fgrid">
+        <div class="fg"><label>Min Booking (₹)</label><input type="number" placeholder="5000"></div>
+        <div class="fg"><label>Max Uses</label><input type="number" placeholder="500"></div>
+      </div>
+      <div class="fgrid">
+        <div class="fg"><label>Valid From</label><input type="date"></div>
+        <div class="fg"><label>Valid Till</label><input type="date"></div>
+      </div>
+      <button class="btn btn-primary" onclick="createCoupon()">🎟 Create Coupon</button>
+    </div>
+    <div class="card">
+      <div class="card-title">Active Coupons</div>
+      ${[{ code: 'HOLI25', disc: '25%', used: 142, total: 500, exp: '31 Mar' }, { code: 'WEEKEND15', disc: '15%', used: 89, total: 200, exp: '28 Feb' }, { code: 'FIRSTTRIP', disc: '₹500', used: 312, total: 1000, exp: '31 Dec' }].map(c => `
+      <div style="border:1.5px dashed var(--border);border-radius:12px;padding:1rem;margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <span style="font-family:'Playfair Display',serif;font-weight:700;font-size:1.1rem;color:var(--terra)">${c.code}</span>
+          <span class="bdg b-ok">${c.disc} OFF</span>
+        </div>
+        <div style="font-size:0.78rem;color:var(--bark);margin-bottom:6px">Used: ${c.used}/${c.total} · Expires: ${c.exp}</div>
+        <div style="height:4px;background:var(--border);border-radius:2px"><div style="width:${Math.round(c.used / c.total * 100)}%;height:100%;background:var(--olive);border-radius:2px"></div></div>
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+function createCoupon() {
+  const code = (document.getElementById('cCode').value || '').trim().toUpperCase();
+  if (!code) { showToast('⚠ Enter a coupon code'); return; }
+  showToast(`🎟 Coupon ${code} created!`);
+}
+
+// ============================================================
+//  SETTINGS
+// ============================================================
+function renderSettings(el) {
+  el.innerHTML = `
+  <div style="max-width:700px;display:flex;flex-direction:column;gap:1.5rem">
+    <div class="card">
+      <div class="card-title">Platform Configuration</div>
+      <div class="fgrid">
+        <div class="fg"><label>Platform Name</label><input type="text" value="GramVaas"></div>
+        <div class="fg"><label>Support Email</label><input type="email" value="support@gramvaas.com"></div>
+      </div>
+      <div class="fgrid">
+        <div class="fg"><label>Commission Rate (%)</label><input type="number" value="15"></div>
+        <div class="fg"><label>GST Rate (%)</label><input type="number" value="18"></div>
+      </div>
+      <button class="btn btn-primary" onclick="showToast('✅ Settings saved!')">Save Settings</button>
+    </div>
+    <div class="card">
+      <div class="card-title">🔒 Change Admin Password</div>
+      <div class="fgrid">
+        <div class="fg"><label>Current Password</label><input type="password" id="curP" placeholder="Current password"></div>
+        <div class="fg"><label>New Password</label><input type="password" id="newP" placeholder="Min 6 characters"></div>
+      </div>
+      <div class="fg"><label>Confirm New Password</label><input type="password" id="cfP" placeholder="Repeat new password"></div>
+      <button class="btn btn-outline" onclick="changePassword()">🔑 Update Password</button>
+      <p style="margin-top:0.75rem;font-size:0.78rem;color:var(--bark)">⚠ Also update <code style="background:var(--sand);padding:2px 6px;border-radius:4px">ADMIN_PASSWORD</code> in admin.html for permanent change.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">🔥 Firebase Status</div>
+      <div style="display:flex;align-items:center;gap:12px;padding:1rem;background:${window.DB ? '#E6F7EE' : '#FEE8E8'};border-radius:10px">
+        <span style="font-size:1.5rem">${window.DB ? '✅' : '❌'}</span>
+        <div>
+          <div style="font-weight:600;color:${window.DB ? '#1B7A4A' : '#C0392B'}">${window.DB ? 'Firebase Connected — Real-time sync active' : 'Firebase NOT connected'}</div>
+          <div style="font-size:0.8rem;color:var(--bark);margin-top:2px">Project: gramvaas | Properties & bookings sync across all devices instantly</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title" style="color:var(--terra)">⚠️ Danger Zone</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-danger" style="border-radius:50px" onclick="resetAllData()">Reset All Data</button>
+        <button class="btn btn-outline" onclick="showToast('📦 Feature coming soon!')">Download Backup</button>
+      </div>
+    </div>
+  </div>`;
+}
+function changePassword() {
+  const c = document.getElementById('curP').value;
+  const n = document.getElementById('newP').value;
+  const f = document.getElementById('cfP').value;
+  if (!c || !n || !f) { showToast('⚠ Fill all fields'); return; }
+  if (c !== ADMIN_PASSWORD) { showToast('❌ Current password wrong'); return; }
+  if (n.length < 6) { showToast('⚠ Min 6 characters'); return; }
+  if (n !== f) { showToast('❌ Passwords do not match'); return; }
+  showToast('✅ Updated! Also change ADMIN_PASSWORD in admin.html.');
+}
+async function resetAllData() {
+  if (!confirm('Delete ALL properties from Firebase? This cannot be undone!')) return;
+  const props = await dbGetAll('properties');
+  for (const p of props) await dbDelete('properties', p.id);
+  showToast('🔄 All data reset');
+  showTab('dashboard');
+}
+
+// ============================================================
+//  HELPERS
+// ============================================================
+function sbadge(s) { return s === 'confirmed' ? 'b-ok' : s === 'pending' ? 'b-warn' : s === 'cancelled' ? 'b-err' : 'b-info'; }
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+// ============================================================
+//  INIT — runs after DOM ready
+// ============================================================
+document.addEventListener('DOMContentLoaded', () => {
+  checkSession();
+});
+</script>
+</body>
+</html>
